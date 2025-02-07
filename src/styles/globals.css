@@ -1,0 +1,214 @@
+@import url("https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@300..700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Space Grotesk", serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.slider-container {
+  position: relative;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  /* height: calc(100vh - 160px); */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.slider-container::-webkit-scrollbar {
+  display: none;
+}
+
+.featured-works-slider {
+  height: 100%;
+  position: relative;
+}
+
+.featured-works-slider .slick-track {
+  display: flex !important;
+  gap: 1rem;
+}
+
+.featured-works-slider .slick-slide {
+  height: inherit !important;
+  opacity: 0.5;
+  transition: all 0.5s ease;
+}
+
+.featured-works-slider .slick-slide > div {
+  height: 100%;
+}
+
+.featured-works-slider .slick-active {
+  opacity: 1;
+}
+
+.custom-dots {
+  position: absolute !important;
+  top: -20px !important;
+  right: 0 !important;
+  display: flex !important;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  z-index: 10;
+  width: auto !important;
+}
+
+.custom-dot {
+  position: relative !important;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(109, 110, 114, 0.3);
+  border-radius: 50%;
+  transition: all 0.5s cubic-bezier(0.87, 0, 0.13, 1) !important;
+  cursor: pointer;
+}
+
+.slick-active .custom-dot {
+  background-color: #6d6e72;
+  width: 24px;
+  border-radius: 12px;
+}
+
+@media (max-width: 1180px) {
+  .slider-container {
+    /* height: 60vh; */
+  }
+
+  .featured-works-slider .slick-track {
+    gap: 0.5rem;
+  }
+
+  .custom-dots {
+    justify-content: flex-end !important;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .slider-container {
+    height: 58vh;
+  }
+
+  .featured-works-slider .slick-track {
+    gap: 0.5rem;
+  }
+
+  .custom-dots {
+    justify-content: flex-end !important;
+    padding-right: 8px;
+  }
+}
+
+.react-calendar {
+  width: 100%;
+  max-width: 350px;
+  font-family: inherit;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.react-calendar__navigation button {
+  min-width: 44px;
+  padding: 0.5rem;
+  background: none;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.react-calendar__navigation button:disabled {
+  color: #9ca3af;
+}
+
+.react-calendar__navigation button:hover:enabled {
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  padding-bottom: 0.5rem;
+}
+
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.react-calendar__tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  padding: 0.5rem;
+  color: #374151;
+}
+
+.react-calendar__tile:hover {
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.react-calendar__tile--active,
+.react-calendar__tile--active:hover {
+  background: #933ffe !important;
+  color: white !important;
+  border-radius: 0.5rem;
+}
+
+.react-calendar__tile--now {
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.react-calendar__tile:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
