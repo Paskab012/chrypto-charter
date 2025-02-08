@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plane } from "lucide-react";
+import { Calendar as CalendarIcon, Plane, Plus } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -13,91 +13,258 @@ import {
 } from "../ui/select";
 import Image from "next/image";
 import Link from "next/link";
+import renderFlightForm from "./dynamicFlightForm";
+import DynamicFlightForm from "./dynamicFlightForm";
+
+type FlightType = "one-way" | "return" | "multi-city";
+
+interface FlightForm {
+  id: string;
+  from: string;
+  to: string;
+  passengers: string;
+  date: Date | undefined;
+}
 
 const BookingForm = () => {
   const [date, setDate] = useState<Date>();
   const [passengers, setPassengers] = useState("2");
+  const [flightType, setFlightType] = useState<FlightType>("one-way");
+  const [flightForms, setFlightForms] = useState<FlightForm[]>([]);
+
+  // Reset or initialize flight forms when flight type changes
+  useEffect(() => {
+    if (flightType === "multi-city") {
+      setFlightForms([
+        {
+          id: "1",
+          from: "",
+          to: "",
+          passengers: "2",
+          date: undefined
+        }
+      ]);
+    } else {
+      setFlightForms([]);
+    }
+  }, [flightType]);
+
+  const addFlightForm = () => {
+    if (flightForms.length < 5) {
+      setFlightForms([
+        ...flightForms,
+        {
+          id: String(flightForms.length + 1),
+          from: "",
+          to: "",
+          passengers: "2",
+          date: undefined
+        }
+      ]);
+    }
+  };
+
+  const updateFlightForm = (
+    id: string,
+    field: keyof FlightForm,
+    value: any
+  ) => {
+    setFlightForms((forms) =>
+      forms.map((form) => (form.id === id ? { ...form, [field]: value } : form))
+    );
+  };
 
   return (
     <div className='space-y-6 text-gray-900'>
       <h2 className='text-xl font-semibold  mb-6'>Flight information</h2>
 
-      <div className='grid grid-cols-1 md:grid-cols-8 gap-4'>
-        <div className='space-y-2 md:col-span-3'>
-          <label className='text-sm font-medium text-gray-900'>From</label>
-          <div className='relative'>
-            <input
-              type='text'
-              placeholder='Type airport, city or country'
-              className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
-            />
-            <Image
-              width={4}
-              height={4}
-              alt='takeoff'
-              src='/charter/takeoff.svg'
-              className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-            />{" "}
+      <div className='flex items-center gap-6 mb-6'>
+        <label className='relative flex items-center gap-2 cursor-pointer'>
+          <input
+            type='radio'
+            name='flight-type'
+            value='one-way'
+            checked={flightType === "one-way"}
+            onChange={(e) => setFlightType(e.target.value as FlightType)}
+            className='sr-only'
+          />
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              flightType === "one-way" ? "border-[#6366F1]" : "border-gray-300"
+            }`}
+          >
+            {flightType === "one-way" && (
+              <div className='w-3 h-3 rounded-full bg-[#6366F1]' />
+            )}
           </div>
-        </div>
+          <span
+            className={`text-sm ${
+              flightType === "one-way" ? "text-gray-900" : "text-gray-500"
+            }`}
+          >
+            One way
+          </span>
+        </label>
 
-        <div className='space-y-2 md:col-span-2'>
-          <label className='text-sm font-medium text-gray-900'>To</label>
-          <div className='relative'>
-            <input
-              type='text'
-              placeholder='Type airport, city or country'
-              className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
-            />
-            <Image
-              width={4}
-              height={4}
-              alt='landing'
-              src='/charter/land.svg'
-              className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-            />
+        <label className='relative flex items-center gap-2 cursor-pointer'>
+          <input
+            type='radio'
+            name='flight-type'
+            value='return'
+            checked={flightType === "return"}
+            onChange={(e) => setFlightType(e.target.value as FlightType)}
+            className='sr-only'
+          />
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              flightType === "return" ? "border-[#6366F1]" : "border-gray-300"
+            }`}
+          >
+            {flightType === "return" && (
+              <div className='w-3 h-3 rounded-full bg-[#6366F1]' />
+            )}
           </div>
-        </div>
+          <span
+            className={`text-sm ${
+              flightType === "return" ? "text-gray-900" : "text-gray-500"
+            }`}
+          >
+            Return
+          </span>
+        </label>
 
-        <div className='space-y-2 md:col-span-1'>
-          <label className='text-sm font-medium text-gray-700'>
-            Passengers
-          </label>
-          <Select value={passengers} onValueChange={setPassengers}>
-            <SelectTrigger className='w-full rounded-lg bg-[#F6F6F6] border-[#BFBFBF] p-3 text-sm'>
-              <SelectValue placeholder='Select passengers' />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                <SelectItem key={num} value={num.toString()}>
-                  {num}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='space-y-2 md:col-span-2'>
-          <label className='text-sm font-medium text-gray-700'>Date</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className='w-full flex items-center justify-between rounded-lg bg-[#F6F6F6] border-[#BFBFBF] border p-3 text-sm'>
-                {date ? format(date, "PPP") : "Select date"}
-                <CalendarIcon className='h-4 w-4 text-gray-400' />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className='w-auto p-0' align='start'>
-              <Calendar
-                mode='single'
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <label className='relative flex items-center gap-2 cursor-pointer'>
+          <input
+            type='radio'
+            name='flight-type'
+            value='multi-city'
+            checked={flightType === "multi-city"}
+            onChange={(e) => setFlightType(e.target.value as FlightType)}
+            className='sr-only'
+          />
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              flightType === "multi-city"
+                ? "border-[#6366F1]"
+                : "border-gray-300"
+            }`}
+          >
+            {flightType === "multi-city" && (
+              <div className='w-3 h-3 rounded-full bg-[#6366F1]' />
+            )}
+          </div>
+          <span
+            className={`text-sm ${
+              flightType === "multi-city" ? "text-gray-900" : "text-gray-500"
+            }`}
+          >
+            Multi-city
+          </span>
+        </label>
       </div>
 
+      {flightType !== "multi-city" && (
+        <div className='grid grid-cols-1 md:grid-cols-8 gap-4'>
+          <div className='space-y-2 md:col-span-3'>
+            <label className='text-sm font-medium text-gray-900'>From</label>
+            <div className='relative'>
+              <input
+                type='text'
+                placeholder='Type airport, city or country'
+                className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
+              />
+              <Image
+                width={4}
+                height={4}
+                alt='takeoff'
+                src='/charter/takeoff.svg'
+                className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
+              />{" "}
+            </div>
+          </div>
+
+          <div className='space-y-2 md:col-span-2'>
+            <label className='text-sm font-medium text-gray-900'>To</label>
+            <div className='relative'>
+              <input
+                type='text'
+                placeholder='Type airport, city or country'
+                className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
+              />
+              <Image
+                width={4}
+                height={4}
+                alt='landing'
+                src='/charter/land.svg'
+                className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
+              />
+            </div>
+          </div>
+
+          <div className='space-y-2 md:col-span-1'>
+            <label className='text-sm font-medium text-gray-700'>
+              Passengers
+            </label>
+            <Select value={passengers} onValueChange={setPassengers}>
+              <SelectTrigger className='w-full rounded-lg bg-[#F6F6F6] border-[#BFBFBF] p-3 text-sm'>
+                <SelectValue placeholder='Select passengers' />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='space-y-2 md:col-span-2'>
+            <label className='text-sm font-medium text-gray-700'>Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className='w-full flex items-center justify-between rounded-lg bg-[#F6F6F6] border-[#BFBFBF] border p-3 text-sm'>
+                  {date ? format(date, "PPP") : "Select date"}
+                  <CalendarIcon className='h-4 w-4 text-gray-400' />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className='w-auto p-0' align='start'>
+                <Calendar
+                  mode='single'
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      )}
+
+      {flightType === "multi-city" && (
+        <>
+          <div className='space-y-4'>
+            {flightForms.map((form, index) => (
+              <DynamicFlightForm
+                key={form.id}
+                form={form}
+                index={index}
+                updateFlightForm={updateFlightForm}
+              />
+            ))}
+          </div>
+
+          {flightForms.length < 5 && (
+            <button
+              onClick={addFlightForm}
+              className='flex items-center gap-2 text-[#6366F1] hover:text-[#4F46E5] transition-colors text-sm font-medium mt-4'
+            >
+              <Plus className='w-4 h-4' />
+              Add another flight
+            </button>
+          )}
+        </>
+      )}
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
