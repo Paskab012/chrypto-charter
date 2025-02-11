@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
+import { CharterProvider } from "../context/charterContext";
 
 export const metadata: Metadata = {
   title: "Cryprto-charter platform",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className='bg-black'>{children}</body>
+      <body className='bg-black'>
+        <CharterProvider>{children}</CharterProvider>
+      </body>
     </html>
   );
 }

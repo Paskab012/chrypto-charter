@@ -26,30 +26,6 @@ const CalculateFlight = () => {
     };
   }, []);
 
-  const fadeInLeft = {
-    initial: { opacity: 0, x: -50 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.8, ease: "easeOut" }
-  };
-
-  const fadeInRight = {
-    initial: { opacity: 0, x: 50 },
-    animate: { opacity: 1, x: 0 },
-    transition: { duration: 0.8, ease: "easeOut" }
-  };
-
-  const imageVariants = {
-    initial: { scale: 1.1, opacity: 0 },
-    animate: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 1.2,
-        ease: "easeOut"
-      }
-    }
-  };
-
   return (
     <QuoteLayout>
       <BookingForm />
