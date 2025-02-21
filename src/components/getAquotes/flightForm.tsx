@@ -24,7 +24,7 @@ const FlightForm = () => {
         <h2 className='mb-4 text-xl font-semibold text-gray-900'>
           {CHARTER_TITLES[selectedService]}
         </h2>
-        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 text-black'>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-1 text-black'>
           <ServiceButton
             type='jet'
             isSelected={selectedService === "jet"}

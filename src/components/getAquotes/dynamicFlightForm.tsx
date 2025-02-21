@@ -107,7 +107,7 @@ const DynamicFlightForm = ({
               mode='single'
               selected={form.date}
               onSelect={(date) => updateFlightForm(form.id, "date", date)}
-              initialFocus
+              // initialFocus
             />
           </PopoverContent>
         </Popover>

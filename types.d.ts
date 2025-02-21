@@ -65,3 +65,65 @@ interface BookingFormData {
   phone?: string;
   message: string;
 }
+
+interface Airport {
+  id: string;
+  airport_id: string;
+  airport_name: string;
+  iata_code: string;
+  icao_code: string;
+  country_iso2: string;
+  country_name: string | null;
+  city_iata_code: string;
+  latitude: string;
+  longitude: string;
+  phone_number: string | null;
+  timezone: string;
+  gmt: string;
+  geoname_id: string;
+}
+
+interface AirportSearchResponse {
+  data: Airport[];
+  pagination: {
+    limit: number;
+    offset: number;
+    count: number;
+    total: number;
+  };
+}
+
+interface AirportResponse {
+  pagination: {
+    offset: number;
+    limit: number;
+    count: number;
+    total: number;
+  };
+  data: Airport[];
+}
+
+interface FlightCalculatorInput {
+  departure_airport: string;
+  arrival_airport: string;
+  aircraft: string;
+  pax: number;
+  airway_time: boolean;
+}
+
+interface FlightCalculatorResponse {
+  time: {
+    airway: number;
+  };
+  airport: {
+    arrival_airport: string;
+    departure_airport: string;
+  };
+  aircraft: string;
+}
+
+interface CalculationResult {
+  success: boolean;
+  data?: FlightCalculatorResponse;
+  error?: string;
+}
