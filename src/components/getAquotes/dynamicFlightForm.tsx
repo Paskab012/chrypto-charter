@@ -1,4 +1,3 @@
-// dynamicFlightForm.tsx
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
@@ -10,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue
 } from "../ui/select";
-import Image from "next/image";
+import TimeSelect from "./timeSelect";
+import AirportSearchInput from "./aiportSearchInput";
 
 interface FlightForm {
   id: string;
@@ -18,9 +18,10 @@ interface FlightForm {
   to: string;
   passengers: string;
   date: Date | undefined;
+  time?: string;
 }
 
-interface RenderFlightFormProps {
+interface DynamicFlightFormProps {
   form: FlightForm;
   index: number;
   updateFlightForm: (id: string, field: keyof FlightForm, value: any) => void;
@@ -28,48 +29,33 @@ interface RenderFlightFormProps {
 
 const DynamicFlightForm = ({
   form,
+  index,
   updateFlightForm
-}: RenderFlightFormProps) => {
+}: DynamicFlightFormProps) => {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-8 gap-4 mt-4'>
-      <div className='space-y-2 md:col-span-3'>
-        <label className='text-sm font-medium text-gray-900'>From</label>
-        <div className='relative'>
-          <input
-            type='text'
-            placeholder='Type airport, city or country'
-            value={form.from}
-            onChange={(e) => updateFlightForm(form.id, "from", e.target.value)}
-            className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
-          />
-          <Image
-            width={4}
-            height={4}
-            alt='takeoff'
-            src='/charter/takeoff.svg'
-            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-          />
-        </div>
+    <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mt-4'>
+      <div className='md:col-span-4'>
+        <AirportSearchInput
+          name={`flight-${form.id}-from`}
+          label='From'
+          placeholder='Type airport, city or country'
+          icon='/charter/takeoff.svg'
+          iconAlt='takeoff'
+          value={form.from}
+          onChange={(value: any) => updateFlightForm(form.id, "from", value)}
+        />
       </div>
 
-      <div className='space-y-2 md:col-span-2'>
-        <label className='text-sm font-medium text-gray-900'>To</label>
-        <div className='relative'>
-          <input
-            type='text'
-            placeholder='Type airport, city or country'
-            value={form.to}
-            onChange={(e) => updateFlightForm(form.id, "to", e.target.value)}
-            className='w-full rounded-lg bg-[#F6F6F6] border border-[#BFBFBF] p-3 pl-10 text-sm placeholder:text-gray-700'
-          />
-          <Image
-            width={4}
-            height={4}
-            alt='landing'
-            src='/charter/land.svg'
-            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-          />
-        </div>
+      <div className='md:col-span-4'>
+        <AirportSearchInput
+          name={`flight-${form.id}-to`}
+          label='To'
+          placeholder='Type airport, city or country'
+          icon='/charter/land.svg'
+          iconAlt='landing'
+          value={form.to}
+          onChange={(value: any) => updateFlightForm(form.id, "to", value)}
+        />
       </div>
 
       <div className='space-y-2 md:col-span-1'>
@@ -97,8 +83,11 @@ const DynamicFlightForm = ({
         <label className='text-sm font-medium text-gray-700'>Date</label>
         <Popover>
           <PopoverTrigger asChild>
-            <button className='w-full flex items-center justify-between rounded-lg bg-[#F6F6F6] border-[#BFBFBF] border p-3 text-sm'>
-              {form.date ? format(form.date, "PPP") : "Select date"}
+            <button
+              type='button'
+              className='w-full flex items-center justify-between rounded-lg bg-[#F6F6F6] border-[#BFBFBF] border p-3 text-sm'
+            >
+              {form.date ? format(form.date, "dd/MM/yyyy") : "Select date"}
               <CalendarIcon className='h-4 w-4 text-gray-400' />
             </button>
           </PopoverTrigger>
@@ -107,10 +96,17 @@ const DynamicFlightForm = ({
               mode='single'
               selected={form.date}
               onSelect={(date) => updateFlightForm(form.id, "date", date)}
-              // initialFocus
             />
           </PopoverContent>
         </Popover>
+      </div>
+
+      <div className='space-y-2 md:col-span-1'>
+        <TimeSelect
+          name={`flight-${form.id}-time`}
+          value={form.time}
+          onChange={(value) => updateFlightForm(form.id, "time", value)}
+        />
       </div>
     </div>
   );

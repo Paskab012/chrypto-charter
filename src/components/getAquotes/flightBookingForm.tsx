@@ -132,13 +132,15 @@ const BookingForm = () => {
         calculateFlight
       );
 
-      if (result.success && result.data) {
-        const singleFlightForm = createFlightForm(data);
-        setFlightForms([singleFlightForm]);
-        router.push("/flight-booking-info");
-      } else {
-        throw new Error(result.error || "Failed to calculate flight");
-      }
+      router.push("/flight-booking-info");
+
+      // if (result.success && result.data) {
+      //   const singleFlightForm = createFlightForm(data);
+      //   setFlightForms([singleFlightForm]);
+      //   router.push("/flight-booking-info");
+      // } else {
+      //   throw new Error(result.error || "Failed to calculate flight");
+      // }
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -180,10 +182,10 @@ const BookingForm = () => {
             }`}
         >
           {isLoading
-            ? "Calculating..."
+            ? "Gettin infos..."
             : flightType === "multi-city"
             ? "Get Booking Info"
-            : "Calculate"}
+            : "Get Infos"}
         </motion.button>
       </form>
     </FormProvider>

@@ -30,7 +30,7 @@ const SingleFlightForm = () => {
   } = useFormContext();
 
   const router = useRouter();
-  const { setFlightCalculation } = useCharter();
+  const { flightType, setFlightCalculation } = useCharter();
   const { calculateFlight, isLoading, error } = useFlightCalculator();
 
   const formValues = watch();
@@ -39,6 +39,9 @@ const SingleFlightForm = () => {
     formValues.to &&
     formValues.passengers &&
     formValues.date;
+
+  const fromLabel = flightType === "return" ? "To" : "From";
+  const toLabel = flightType === "return" ? "From" : "To";
 
   const onSubmit = async (data: any) => {
     try {
@@ -60,7 +63,7 @@ const SingleFlightForm = () => {
       <div className='md:col-span-4'>
         <AirportSearchInput
           name='from'
-          label='From'
+          label={fromLabel}
           placeholder='Type airport, city or country'
           icon='/charter/takeoff.svg'
           iconAlt='takeoff'
@@ -69,7 +72,7 @@ const SingleFlightForm = () => {
       <div className='md:col-span-4'>
         <AirportSearchInput
           name='to'
-          label='To'
+          label={toLabel}
           placeholder='Type airport, city or country'
           icon='/charter/land.svg'
           iconAlt='landing'

@@ -2,6 +2,15 @@ import { Plus } from "lucide-react";
 import { useCharter } from "@/src/context/charterContext";
 import DynamicFlightForm from "./dynamicFlightForm";
 
+interface FlightForm {
+  id: string;
+  from: string;
+  to: string;
+  passengers: string;
+  date: Date | undefined;
+  time: any;
+}
+
 const MultiCityFlights = () => {
   const { flightForms, setFlightForms } = useCharter();
 
@@ -15,15 +24,21 @@ const MultiCityFlights = () => {
           to: "",
           passengers: "2",
           date: undefined
+          // time: undefined
         }
       ]);
     }
   };
 
-  const updateFlightForm = (id: string, field: string, value: any) => {
-    setFlightForms((forms) =>
-      forms.map((form) => (form.id === id ? { ...form, [field]: value } : form))
+  const updateFlightForm = (
+    id: string,
+    field: keyof FlightForm,
+    value: any
+  ) => {
+    const updatedForms = flightForms.map((form) =>
+      form.id === id ? { ...form, [field]: value } : form
     );
+    setFlightForms(updatedForms);
   };
 
   return (
