@@ -43,21 +43,6 @@ const SingleFlightForm = () => {
   const fromLabel = flightType === "return" ? "To" : "From";
   const toLabel = flightType === "return" ? "From" : "To";
 
-  const onSubmit = async (data: any) => {
-    try {
-      const result = await handleFlightCalculation(data, calculateFlight);
-
-      if (result.success && result.data) {
-        setFlightCalculation(result.data);
-        router.push("/flight-booking-info");
-      } else {
-        toast.error(result.error || "Failed to calculate flight details");
-      }
-    } catch (err) {
-      toast.error("An error occurred while calculating flight details");
-    }
-  };
-
   return (
     <div className='grid grid-cols-1 md:grid-cols-12 gap-4'>
       <div className='md:col-span-4'>

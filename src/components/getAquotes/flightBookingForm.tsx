@@ -113,10 +113,44 @@ const BookingForm = () => {
     };
   };
 
+  const storeFlightData = (data: any) => {
+    try {
+      const formattedData = {
+        ...data,
+        date: data.date ? data.date.toISOString() : undefined,
+        fromAirport: {
+          code: data.from.airport_code,
+          name: data.from.name,
+          location: data.from.location
+        },
+        toAirport: {
+          code: data.to.airport_code,
+          name: data.to.name,
+          location: data.to.location
+        }
+      };
+
+      localStorage.setItem("flightFormData", JSON.stringify(formattedData));
+    } catch (error) {
+      console.error("Error storing data in localStorage:", error);
+      toast.error("Failed to save your booking information");
+    }
+  };
+
+  const storeMultiCityData = (forms: FlightForm[]) => {
+    try {
+      localStorage.setItem("multiCityFlightData", JSON.stringify(forms));
+    } catch (error) {
+      console.error("Error storing multi-city data:", error);
+      toast.error("Failed to save your multi-city booking information");
+    }
+  };
+
   const onSubmit = async (data: FormInputs) => {
     if (flightType === "multi-city") {
       if (flightForms.every((form) => form.from && form.to && form.date)) {
         setFlightForms(flightForms);
+        storeMultiCityData(flightForms);
         router.push("/multicity-booking");
       }
       return;
@@ -126,21 +160,16 @@ const BookingForm = () => {
     if (!calculatorPayload) return;
 
     try {
-      console.log("calculatorPayload ============:>> ", calculatorPayload);
       const result = await handleFlightCalculation(
         calculatorPayload,
         calculateFlight
       );
+      storeFlightData(data);
+      if (result && result.data) {
+        localStorage.setItem("flightCalculation", JSON.stringify(result.data));
+      }
 
       router.push("/flight-booking-info");
-
-      // if (result.success && result.data) {
-      //   const singleFlightForm = createFlightForm(data);
-      //   setFlightForms([singleFlightForm]);
-      //   router.push("/flight-booking-info");
-      // } else {
-      //   throw new Error(result.error || "Failed to calculate flight");
-      // }
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -182,7 +211,7 @@ const BookingForm = () => {
             }`}
         >
           {isLoading
-            ? "Gettin infos..."
+            ? "Getting infos..."
             : flightType === "multi-city"
             ? "Get Booking Info"
             : "Get Infos"}

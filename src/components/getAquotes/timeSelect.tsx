@@ -44,7 +44,7 @@ const TimeSelect = ({
           <SelectTrigger className='w-full rounded-lg bg-[#F6F6F6] border-[#BFBFBF] p-3 text-sm'>
             <div className='flex items-center gap-2'>
               <Clock className='h-4 w-4 text-gray-400' />
-              <SelectValue placeholder='Select time' />
+              <SelectValue />
             </div>
           </SelectTrigger>
           <SelectContent className='max-h-[300px]'>
@@ -80,7 +80,7 @@ const TimeSelect = ({
             >
               <div className='flex items-center gap-2'>
                 <Clock className='h-4 w-4 text-gray-400' />
-                <SelectValue placeholder='Select time' />
+                <SelectValue />
               </div>
             </SelectTrigger>
             <SelectContent className='max-h-[300px]'>

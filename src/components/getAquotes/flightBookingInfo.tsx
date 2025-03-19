@@ -1,13 +1,144 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { format } from "date-fns";
+import { useRouter } from "next/navigation";
+import { FaPlane } from "react-icons/fa";
+import { IoAirplaneSharp } from "react-icons/io5";
+
+interface BookingFormData {
+  email: string;
+  phone: string;
+  message: string;
+}
+
+interface FlightDetails {
+  from: {
+    airport: string;
+    code: string;
+    departure: string;
+    utc: string;
+  };
+  to: {
+    airport: string;
+    code: string;
+    arrival: string;
+    utc: string;
+  };
+  flightTime: {
+    hours: number;
+    distance: string;
+  };
+}
+
+interface StoredFlightData {
+  from: string;
+  to: string;
+  passengers: string;
+  date: string;
+  fromAirport: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  toAirport: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+}
 
 const FlightBookingInfo = () => {
+  const router = useRouter();
   const [formData, setFormData] = React.useState<BookingFormData>({
     email: "",
     phone: "",
     message: ""
   });
+
+  const [flightInfo, setFlightInfo] = React.useState<FlightDetails>({
+    from: {
+      airport: "Loading...",
+      code: "...",
+      departure: "Loading...",
+      utc: "..."
+    },
+    to: {
+      airport: "Loading...",
+      code: "...",
+      arrival: "Loading...",
+      utc: "..."
+    },
+    flightTime: {
+      hours: 0,
+      distance: "..."
+    }
+  });
+
+  const getFlightData = (): StoredFlightData | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const data = localStorage.getItem("flightFormData");
+      if (!data) return null;
+
+      return JSON.parse(data) as StoredFlightData;
+    } catch (error) {
+      console.error("Error retrieving flight data:", error);
+      return null;
+    }
+  };
+
+  const getFlightCalculation = (): any | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const data = localStorage.getItem("flightCalculation");
+      if (!data) return null;
+
+      return JSON.parse(data);
+    } catch (error) {
+      console.error("Error retrieving flight calculation:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const storedData = getFlightData();
+    const calculationData = getFlightCalculation();
+
+    if (!storedData) {
+      console.error("No flight data found in local storage");
+      return;
+    }
+
+    const flightDate = storedData.date ? new Date(storedData.date) : new Date();
+    const arrivalDate = new Date(flightDate.getTime() + 9 * 60 * 60 * 1000);
+    const distance = calculationData?.distance || "11 064 km";
+
+    setFlightInfo({
+      from: {
+        airport: storedData.fromAirport.name || "Unknown Airport",
+        code: `${storedData.fromAirport.code || "???"} (${
+          storedData.fromAirport.location
+        })`,
+        departure: `${format(flightDate, "dd MMM, HH:mm")} LT`,
+        utc: `${format(flightDate, "HH:mm")} UTC`
+      },
+      to: {
+        airport: storedData.toAirport.name || "Unknown Airport",
+        code: `${storedData.toAirport.code || "???"} (${
+          storedData.toAirport.location
+        })`,
+        arrival: `${format(arrivalDate, "dd MMM, HH:mm")} LT`,
+        utc: `${format(arrivalDate, "HH:mm")} UTC`
+      },
+      flightTime: {
+        hours: calculationData?.flightTime?.hours || 9,
+        distance: distance
+      }
+    });
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -21,27 +152,12 @@ const FlightBookingInfo = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
     console.log(formData);
+    localStorage.setItem("bookingContactInfo", JSON.stringify(formData));
   };
 
-  const flightInfo: FlightDetails = {
-    from: {
-      airport: "Dubai Intl",
-      code: "OMDB (DXB)",
-      departure: "07 Feb, 09:00 LT",
-      utc: "05:00 UTC(+4)"
-    },
-    to: {
-      airport: "New York Stewart Intl",
-      code: "OMDB (DXB)",
-      arrival: "07 Feb, 16:08 LT",
-      utc: "21:08 UTC(-5)"
-    },
-    flightTime: {
-      hours: 9,
-      distance: "11 064 km"
-    }
+  const handleChangeFlightInfo = () => {
+    router.push("/");
   };
 
   return (
@@ -58,44 +174,10 @@ const FlightBookingInfo = () => {
               <p className='font-medium'>{flightInfo.from.airport}</p>
               <p className='lg:text-xl font-bold'>{flightInfo.from.code}</p>
             </div>
-            <div className='space-y-1 border-t border-t-gray-300 pt-2'>
-              <p className='text-sm text-gray-500'>Departure</p>
-              <p className='font-medium'>{flightInfo.from.departure}</p>
-              <p className='text-xs text-gray-500'>{flightInfo.from.utc}</p>
-            </div>
           </div>
 
-          <div className='relative'>
-            <div className='bg-[#F6F6F6] rounded-lg p-4 border border-[#BFBFBF] '>
-              <div className='space-y-1 text-center pb-2'>
-                <p className='text-sm text-gray-500'>Time</p>
-                <p className='font-medium'>
-                  {flightInfo.flightTime.hours}hours
-                </p>
-              </div>
-              <div className='space-y-1 text-center border-t border-t-gray-300 pt-2'>
-                <p className='text-sm text-gray-500'>Departure</p>
-                <p className='font-medium'>{flightInfo.flightTime.distance}</p>
-              </div>
-            </div>
-            <div className='absolute -left-12 top-1/2 -translate-y-1/2 -translate-x-1/2 hidden lg:block'>
-              <Image
-                src='/charter/plane-line.svg'
-                alt='Plane'
-                width={16}
-                height={16}
-                className='w-full h-auto object-cover object-center'
-              />
-            </div>
-            <div className='absolute -right-12 top-1/2 -translate-y-1/2 translate-x-1/2 hidden lg:block'>
-              <Image
-                src='/charter/plane-line.svg'
-                alt='Plane'
-                width={16}
-                height={16}
-                className='w-full h-auto object-cover object-center'
-              />
-            </div>
+          <div className=''>
+            <IoAirplaneSharp className='w-full h-6 text-[#b5b5b5]' />
           </div>
 
           <div className='bg-white rounded-lg p-4 border border-[#BFBFBF]'>
@@ -104,11 +186,6 @@ const FlightBookingInfo = () => {
               <p className='font-medium'>{flightInfo.to.airport}</p>
               <p className='lg:text-xl font-bold'>{flightInfo.to.code}</p>
             </div>
-            <div className='space-y-1 border-t border-t-gray-300 pt-2'>
-              <p className='text-sm text-gray-500'>Arrival</p>
-              <p className='font-medium'>{flightInfo.to.arrival}</p>
-              <p className='text-xs text-gray-500'>{flightInfo.to.utc}</p>
-            </div>
           </div>
         </div>
 
@@ -116,6 +193,10 @@ const FlightBookingInfo = () => {
           Do you want to change flight information?{" "}
           <a
             href='#'
+            onClick={(e) => {
+              e.preventDefault();
+              handleChangeFlightInfo();
+            }}
             className='text-[#0074E4] hover:text-[#0074E4]/70 underline'
           >
             Click here
