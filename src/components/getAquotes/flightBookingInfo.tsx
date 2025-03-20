@@ -188,12 +188,10 @@ const FlightBookingInfo = () => {
       const flightData = getFlightData();
       const calculationData = getFlightCalculation();
 
-      // Send the email using EmailJS
       const result = await emailjs.send(
         SERVICE_ID as string,
         TEMPLATE_ID as string,
         {
-          // Personal info
           title: data.title,
           firstName: data.firstName,
           surname: data.surname,

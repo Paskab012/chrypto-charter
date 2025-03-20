@@ -73,7 +73,8 @@ const BookingForm = () => {
           from: "",
           to: "",
           passengers: "2",
-          date: undefined
+          date: undefined,
+          toAirport: undefined
         }
       ]);
     } else {

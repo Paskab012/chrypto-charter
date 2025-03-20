@@ -11,6 +11,7 @@ import {
 } from "../ui/select";
 import TimeSelect from "./timeSelect";
 import AirportSearchInput from "./aiportSearchInput";
+import { useEffect, useRef } from "react";
 
 interface FlightForm {
   id: string;
@@ -19,12 +20,27 @@ interface FlightForm {
   passengers: string;
   date: Date | undefined;
   time?: string;
+  fromAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  toAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
 }
 
 interface DynamicFlightFormProps {
   form: FlightForm;
   index: number;
-  updateFlightForm: (id: string, field: keyof FlightForm, value: any) => void;
+  updateFlightForm: (
+    id: string,
+    field: keyof FlightForm,
+    value: any,
+    airportData?: any
+  ) => void;
 }
 
 const DynamicFlightForm = ({
@@ -32,6 +48,68 @@ const DynamicFlightForm = ({
   index,
   updateFlightForm
 }: DynamicFlightFormProps) => {
+  const isInitialRender = useRef(true);
+
+  // Save to local storage whenever form changes but avoid unnecessary initial saves
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    const key = `flight-${form.id}`;
+    localStorage.setItem(key, JSON.stringify(form));
+  }, [form]);
+
+  // Handle airport selection with full airport data
+  const handleFromAirportChange = (value: any, airportData?: any) => {
+    if (value === null) {
+      // Clear airport data
+      updateFlightForm(form.id, "from", "");
+      updateFlightForm(form.id, "fromAirport", undefined);
+      return;
+    }
+
+    // Update the from field with the airport code or the entire value object
+    const airportCode =
+      airportData?.airport_code ||
+      (typeof value === "object" ? value.airport_code : value);
+    updateFlightForm(form.id, "from", airportCode || value);
+
+    // If we have airport data, update the fromAirport object
+    if (airportData) {
+      updateFlightForm(form.id, "fromAirport", {
+        code: airportData.airport_code,
+        name: airportData.name,
+        location: airportData.location
+      });
+    }
+  };
+
+  const handleToAirportChange = (value: any, airportData?: any) => {
+    if (value === null) {
+      // Clear airport data
+      updateFlightForm(form.id, "to", "");
+      updateFlightForm(form.id, "toAirport", undefined);
+      return;
+    }
+
+    // Update the to field with the airport code or the entire value object
+    const airportCode =
+      airportData?.airport_code ||
+      (typeof value === "object" ? value.airport_code : value);
+    updateFlightForm(form.id, "to", airportCode || value);
+
+    // If we have airport data, update the toAirport object
+    if (airportData) {
+      updateFlightForm(form.id, "toAirport", {
+        code: airportData.airport_code,
+        name: airportData.name,
+        location: airportData.location
+      });
+    }
+  };
+
   return (
     <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mt-4'>
       <div className='md:col-span-4'>
@@ -42,7 +120,8 @@ const DynamicFlightForm = ({
           icon='/charter/takeoff.svg'
           iconAlt='takeoff'
           value={form.from}
-          onChange={(value: any) => updateFlightForm(form.id, "from", value)}
+          initialAirport={form.fromAirport}
+          onChange={handleFromAirportChange}
         />
       </div>
 
@@ -54,7 +133,8 @@ const DynamicFlightForm = ({
           icon='/charter/land.svg'
           iconAlt='landing'
           value={form.to}
-          onChange={(value: any) => updateFlightForm(form.id, "to", value)}
+          initialAirport={form.toAirport}
+          onChange={handleToAirportChange}
         />
       </div>
 
@@ -94,7 +174,7 @@ const DynamicFlightForm = ({
           <PopoverContent className='w-auto p-0' align='start'>
             <Calendar
               mode='single'
-              selected={form.date}
+              selected={form.date instanceof Date ? form.date : undefined}
               onSelect={(date) => updateFlightForm(form.id, "date", date)}
             />
           </PopoverContent>

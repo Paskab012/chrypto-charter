@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import Image from "next/image";
 import {
@@ -19,7 +19,12 @@ interface AirportSearchInputProps {
   icon: string;
   iconAlt: string;
   value?: any;
-  onChange?: (value: any) => void;
+  initialAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  onChange?: (value: any, airportData?: any) => void;
 }
 
 const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
@@ -29,6 +34,7 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
   icon,
   iconAlt,
   value: externalValue,
+  initialAirport,
   onChange: externalOnChange
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,6 +43,7 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
     control,
     formState: { errors }
   } = useFormContext();
+  const hasInitialized = useRef(false);
 
   const filteredAirports = filterAirports(searchQuery);
 
@@ -44,15 +51,60 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
     fetchAllAirports();
   }, [fetchAllAirports]);
 
+  // Only initialize the airport selection once and only if needed
+  useEffect(() => {
+    // Only run this effect if we have an initialAirport, we have an onChange handler,
+    // there's no externalValue yet, and we haven't already initialized
+    if (
+      initialAirport?.code &&
+      externalOnChange &&
+      !externalValue &&
+      !hasInitialized.current
+    ) {
+      hasInitialized.current = true;
+
+      // Create compatible airport object with the required structure
+      const airportObj = {
+        id: initialAirport.code,
+        name: initialAirport.name,
+        airport_code: initialAirport.code,
+        location: initialAirport.location
+      };
+
+      // Use setTimeout to break the cycle of immediate updates
+      setTimeout(() => {
+        externalOnChange(airportObj, airportObj);
+      }, 0);
+    }
+  }, [initialAirport, externalOnChange, externalValue]);
+
   const formatSelectedValue = (value: any) => {
     if (!value) return "";
 
     try {
-      const parsed = typeof value === "string" ? JSON.parse(value) : value;
-      return `${parsed.name} (${parsed.airport_code})`;
+      // If it's a string that contains an object, parse it
+      if (
+        typeof value === "string" &&
+        (value.startsWith("{") || value.startsWith("["))
+      ) {
+        const parsed = JSON.parse(value);
+        return `${parsed.name || parsed.airport_name || ""} (${
+          parsed.airport_code || parsed.code || ""
+        })`;
+      }
+      // If it's already an object
+      else if (typeof value === "object" && value !== null) {
+        return `${value.name || value.airport_name || ""} (${
+          value.airport_code || value.code || ""
+        })`;
+      }
+      // If it's just a string (like an airport code)
+      else {
+        return value;
+      }
     } catch (error) {
-      console.error("Error parsing airport value:", error);
-      return "";
+      console.error("Error formatting airport value:", error);
+      return String(value);
     }
   };
 
@@ -65,14 +117,42 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
           control={control}
           rules={{ required: `${label} is required` }}
           render={({ field }) => {
+            // Determine the current value (external value takes precedence)
             const currentValue =
               externalValue !== undefined ? externalValue : field.value;
 
-            const selectValue = currentValue
-              ? typeof currentValue === "string"
-                ? currentValue
-                : JSON.stringify(currentValue)
-              : "";
+            // Handle the select value formatting
+            let selectValue = "";
+            if (currentValue) {
+              if (typeof currentValue === "string") {
+                // If it's already a JSON string, use it directly
+                if (
+                  currentValue.startsWith("{") ||
+                  currentValue.startsWith("[")
+                ) {
+                  selectValue = currentValue;
+                } else {
+                  // Try to find the corresponding airport
+                  const matchingAirport = airports.find(
+                    (a) => a.icao_code === currentValue || a.id === currentValue
+                  );
+
+                  if (matchingAirport) {
+                    selectValue = JSON.stringify({
+                      id: matchingAirport.id,
+                      name: matchingAirport.airport_name,
+                      airport_code: matchingAirport.icao_code,
+                      location: matchingAirport.country_name
+                    });
+                  } else {
+                    selectValue = currentValue; // Fallback to original value
+                  }
+                }
+              } else {
+                // If it's an object, stringify it
+                selectValue = JSON.stringify(currentValue);
+              }
+            }
 
             return (
               <Select
@@ -90,16 +170,16 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
                   try {
                     const selected = JSON.parse(value);
                     if (externalOnChange) {
-                      externalOnChange(selected);
+                      externalOnChange(selected, selected);
                     } else {
                       field.onChange(selected);
                     }
                   } catch (error) {
                     console.error("Error parsing JSON:", value, error);
                     if (externalOnChange) {
-                      externalOnChange(null);
+                      externalOnChange(value);
                     } else {
-                      field.onChange(null);
+                      field.onChange(value);
                     }
                   }
                 }}

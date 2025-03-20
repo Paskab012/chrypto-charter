@@ -5,6 +5,7 @@ type ServiceType = "jet" | "yacht";
 type FlightType = "one-way" | "return" | "multi-city";
 
 interface FlightForm {
+  toAirport: any;
   id: string;
   from: string;
   to: string;
