@@ -127,3 +127,21 @@ interface CalculationResult {
   data?: FlightCalculatorResponse;
   error?: string;
 }
+
+interface FlightForm {
+  id: string;
+  from: string;
+  to: string;
+  passengers: string;
+  date: Date | undefined;
+  fromAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  toAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+}

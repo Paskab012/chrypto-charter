@@ -50,7 +50,6 @@ const DynamicFlightForm = ({
 }: DynamicFlightFormProps) => {
   const isInitialRender = useRef(true);
 
-  // Save to local storage whenever form changes but avoid unnecessary initial saves
   useEffect(() => {
     if (isInitialRender.current) {
       isInitialRender.current = false;
@@ -61,54 +60,61 @@ const DynamicFlightForm = ({
     localStorage.setItem(key, JSON.stringify(form));
   }, [form]);
 
-  // Handle airport selection with full airport data
   const handleFromAirportChange = (value: any, airportData?: any) => {
     if (value === null) {
-      // Clear airport data
       updateFlightForm(form.id, "from", "");
       updateFlightForm(form.id, "fromAirport", undefined);
       return;
     }
 
-    // Update the from field with the airport code or the entire value object
+    // Ensure we have airport code data
     const airportCode =
       airportData?.airport_code ||
       (typeof value === "object" ? value.airport_code : value);
+
+    // Update the form with the airport code
     updateFlightForm(form.id, "from", airportCode || value);
 
-    // If we have airport data, update the fromAirport object
+    // If we have complete airport data, update the fromAirport object
     if (airportData) {
-      updateFlightForm(form.id, "fromAirport", {
+      const airportInfo = {
         code: airportData.airport_code,
         name: airportData.name,
         location: airportData.location
-      });
+      };
+
+      updateFlightForm(form.id, "fromAirport", airportInfo);
     }
   };
 
   const handleToAirportChange = (value: any, airportData?: any) => {
     if (value === null) {
-      // Clear airport data
       updateFlightForm(form.id, "to", "");
       updateFlightForm(form.id, "toAirport", undefined);
       return;
     }
 
-    // Update the to field with the airport code or the entire value object
+    // Ensure we have airport code data
     const airportCode =
       airportData?.airport_code ||
       (typeof value === "object" ? value.airport_code : value);
+
+    // Update the form with the airport code
     updateFlightForm(form.id, "to", airportCode || value);
 
-    // If we have airport data, update the toAirport object
+    // If we have complete airport data, update the toAirport object
     if (airportData) {
-      updateFlightForm(form.id, "toAirport", {
+      const airportInfo = {
         code: airportData.airport_code,
         name: airportData.name,
         location: airportData.location
-      });
+      };
+
+      updateFlightForm(form.id, "toAirport", airportInfo);
     }
   };
+
+  const isFirstFlight = index === 0;
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mt-4'>
@@ -119,9 +125,10 @@ const DynamicFlightForm = ({
           placeholder='Type airport, city or country'
           icon='/charter/takeoff.svg'
           iconAlt='takeoff'
-          value={form.from}
+          value={form.from || (form.fromAirport ? form.fromAirport.code : "")}
           initialAirport={form.fromAirport}
           onChange={handleFromAirportChange}
+          disabled={!isFirstFlight}
         />
       </div>
 
@@ -132,7 +139,7 @@ const DynamicFlightForm = ({
           placeholder='Type airport, city or country'
           icon='/charter/land.svg'
           iconAlt='landing'
-          value={form.to}
+          value={form.to || (form.toAirport ? form.toAirport.code : "")}
           initialAirport={form.toAirport}
           onChange={handleToAirportChange}
         />

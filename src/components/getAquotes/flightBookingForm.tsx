@@ -26,14 +26,6 @@ interface FormInputs {
   date: Date | undefined;
 }
 
-interface FlightForm {
-  id: string;
-  from: string;
-  to: string;
-  passengers: string;
-  date: Date | undefined;
-}
-
 interface FlightCalculatorPayload {
   departure_airport: string;
   arrival_airport: string;
@@ -67,20 +59,25 @@ const BookingForm = () => {
 
   useEffect(() => {
     if (flightType === "multi-city") {
-      setFlightForms([
-        {
-          id: "1",
-          from: "",
-          to: "",
-          passengers: "2",
-          date: undefined,
-          toAirport: undefined
-        }
-      ]);
+      // Initialize with a single flight form if none exists
+      if (flightForms.length === 0) {
+        setFlightForms([
+          {
+            id: "1",
+            from: "",
+            to: "",
+            passengers: "2",
+            date: undefined,
+            fromAirport: undefined,
+            toAirport: undefined
+          }
+        ]);
+      }
     } else {
+      // Reset flight forms when switching away from multi-city
       setFlightForms([]);
     }
-  }, [flightType, setFlightForms]);
+  }, [flightType, setFlightForms, flightForms.length]);
 
   const validateFormData = (
     data: FormInputs
@@ -101,16 +98,6 @@ const BookingForm = () => {
       aircraft: "Embraer Legacy 650",
       pax: Number(data.passengers),
       airway_time: true
-    };
-  };
-
-  const createFlightForm = (data: FormInputs): FlightForm => {
-    return {
-      id: "1",
-      from: data.from.airport_code,
-      to: data.to.airport_code,
-      passengers: data.passengers,
-      date: data.date
     };
   };
 
@@ -140,7 +127,15 @@ const BookingForm = () => {
 
   const storeMultiCityData = (forms: FlightForm[]) => {
     try {
-      localStorage.setItem("multiCityFlightData", JSON.stringify(forms));
+      const formsForStorage = forms.map((form) => ({
+        ...form,
+        date: form.date instanceof Date ? form.date.toISOString() : form.date
+      }));
+
+      localStorage.setItem(
+        "multiCityFlightData",
+        JSON.stringify(formsForStorage)
+      );
     } catch (error) {
       console.error("Error storing multi-city data:", error);
       toast.error("Failed to save your multi-city booking information");
@@ -149,14 +144,30 @@ const BookingForm = () => {
 
   const onSubmit = async (data: FormInputs) => {
     if (flightType === "multi-city") {
-      if (flightForms.every((form) => form.from && form.to && form.date)) {
-        setFlightForms(flightForms);
+      // Enhanced validation for multi-city forms
+      const isValid = flightForms.every(
+        (form) =>
+          form &&
+          form.from &&
+          form.to &&
+          form.date instanceof Date &&
+          form.passengers &&
+          // form.fromAirport &&
+          form.toAirport
+      );
+
+      if (isValid) {
         storeMultiCityData(flightForms);
         router.push("/multicity-booking");
+        return;
+      } else {
+        // Show specific validation errors
+        toast.error("Please complete all required flight information");
+        return;
       }
-      return;
     }
 
+    // Single flight logic
     const calculatorPayload = validateFormData(data);
     if (!calculatorPayload) return;
 
@@ -180,8 +191,24 @@ const BookingForm = () => {
     }
   };
 
+  // Improved form validation logic
+  const isMultiCityValid = flightForms.every(
+    (form) =>
+      form &&
+      form.date instanceof Date &&
+      form.passengers &&
+      form.fromAirport &&
+      form.toAirport
+  );
+
+  const isSingleFlightValid =
+    isValid &&
+    formValues.from?.airport_code &&
+    formValues.to?.airport_code &&
+    formValues.date instanceof Date;
+
   const isFormValid =
-    isValid && formValues.from?.airport_code && formValues.to?.airport_code;
+    flightType === "multi-city" ? isMultiCityValid : isSingleFlightValid;
 
   return (
     <FormProvider {...methods}>

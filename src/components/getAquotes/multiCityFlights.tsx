@@ -25,14 +25,12 @@ interface FlightForm {
 const MultiCityFlights = () => {
   const { flightForms, setFlightForms } = useCharter();
 
-  // Load saved flight forms from localStorage on component mount
   useEffect(() => {
     const savedForms = localStorage.getItem("multiCityFlightData");
     if (savedForms) {
       try {
         const parsedForms = JSON.parse(savedForms);
         if (Array.isArray(parsedForms) && parsedForms.length > 0) {
-          // Convert date strings back to Date objects if they exist
           const formsWithDates = parsedForms.map((form) => ({
             ...form,
             date: form.date ? new Date(form.date) : undefined
@@ -47,26 +45,22 @@ const MultiCityFlights = () => {
 
   const addFlightForm = () => {
     if (flightForms.length < 5) {
-      // Get the destination from the last flight form
       const lastForm = flightForms[flightForms.length - 1];
 
-      // Create new flight form
       const newForm = {
         id: String(flightForms.length + 1),
-        from: lastForm.to || "", // Use the "to" value from last form
+        from: lastForm.to || "",
         to: "",
-        toAirport: "",
-        passengers: lastForm.passengers || "2", // Keep same passenger count
+        passengers: lastForm.passengers || "2",
         date: undefined,
         time: undefined,
-        fromAirport: lastForm.toAirport // Use toAirport object from last form
+        fromAirport: lastForm.toAirport
       };
 
-      const updatedForms = [...flightForms, newForm];
+      const updatedForms: any = [...flightForms, newForm];
       setFlightForms(updatedForms);
 
-      // Save to localStorage
-      saveFormsToLocalStorage(updatedForms as any);
+      saveFormsToLocalStorage(updatedForms);
     }
   };
 
@@ -76,9 +70,8 @@ const MultiCityFlights = () => {
     value: any,
     airportData?: any
   ) => {
-    const updatedForms = flightForms.map((form) => {
+    const updatedForms: any = flightForms.map((form) => {
       if (form.id === id) {
-        // If updating an airport field, also save the airport object
         if (field === "from" && airportData) {
           return {
             ...form,
@@ -108,13 +101,11 @@ const MultiCityFlights = () => {
 
     setFlightForms(updatedForms);
 
-    // Save to localStorage after each update
-    saveFormsToLocalStorage(updatedForms as any);
+    saveFormsToLocalStorage(updatedForms);
   };
 
   const saveFormsToLocalStorage = (forms: FlightForm[]) => {
     try {
-      // Format dates for storage
       const formsForStorage = forms.map((form) => ({
         ...form,
         date: form.date ? form.date.toISOString() : undefined
@@ -129,9 +120,14 @@ const MultiCityFlights = () => {
     }
   };
 
-  // Check if all required fields are filled for validating the form
+  // Improved validation logic that ensures required fields exist and have values
   const areFormsValid = flightForms.every(
-    (form) => form.from && form.to && form.date
+    (form) =>
+      form &&
+      form.from &&
+      form.to &&
+      form.date instanceof Date &&
+      form.passengers
   );
 
   return (
@@ -158,7 +154,6 @@ const MultiCityFlights = () => {
         </button>
       )}
 
-      {/* You might want to pass the validation status to the parent component */}
       <input
         type='hidden'
         name='multiCityFormsValid'
