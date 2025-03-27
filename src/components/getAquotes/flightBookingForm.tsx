@@ -12,6 +12,8 @@ import SingleFlightForm from "./singleFlightForm";
 import MultiCityFlights from "./multiCityFlights";
 import FlightTypeSelector from "./flightSelector";
 
+const allData = require("airport-iata-codes");
+
 interface Airport {
   airport_code: string;
   id: string;
@@ -144,30 +146,25 @@ const BookingForm = () => {
 
   const onSubmit = async (data: FormInputs) => {
     if (flightType === "multi-city") {
-      // Enhanced validation for multi-city forms
       const isValid = flightForms.every(
         (form) =>
           form &&
-          form.from &&
-          form.to &&
+          form.fromAirport?.code &&
+          form.toAirport?.code &&
           form.date instanceof Date &&
-          form.passengers &&
-          // form.fromAirport &&
-          form.toAirport
+          form.passengers
       );
 
       if (isValid) {
         storeMultiCityData(flightForms);
-        router.push("/multicity-booking");
+        router.push("/multicity-booking-infos");
         return;
       } else {
-        // Show specific validation errors
         toast.error("Please complete all required flight information");
         return;
       }
     }
 
-    // Single flight logic
     const calculatorPayload = validateFormData(data);
     if (!calculatorPayload) return;
 
@@ -191,14 +188,13 @@ const BookingForm = () => {
     }
   };
 
-  // Improved form validation logic
   const isMultiCityValid = flightForms.every(
     (form) =>
       form &&
       form.date instanceof Date &&
       form.passengers &&
-      form.fromAirport &&
-      form.toAirport
+      form.fromAirport?.code &&
+      form.toAirport?.code
   );
 
   const isSingleFlightValid =

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { useCharter } from "@/src/context/charterContext";
 import DynamicFlightForm from "./dynamicFlightForm";
 import { useEffect } from "react";
@@ -75,7 +75,7 @@ const MultiCityFlights = () => {
         if (field === "from" && airportData) {
           return {
             ...form,
-            [field]: value,
+            from: airportData.airport_code || value,
             fromAirport: {
               code: airportData.airport_code,
               name: airportData.name,
@@ -86,7 +86,7 @@ const MultiCityFlights = () => {
         if (field === "to" && airportData) {
           return {
             ...form,
-            [field]: value,
+            to: airportData.airport_code || value,
             toAirport: {
               code: airportData.airport_code,
               name: airportData.name,
@@ -94,13 +94,13 @@ const MultiCityFlights = () => {
             }
           };
         }
+
         return { ...form, [field]: value };
       }
       return form;
     });
 
     setFlightForms(updatedForms);
-
     saveFormsToLocalStorage(updatedForms);
   };
 
@@ -120,7 +120,6 @@ const MultiCityFlights = () => {
     }
   };
 
-  // Improved validation logic that ensures required fields exist and have values
   const areFormsValid = flightForms.every(
     (form) =>
       form &&
@@ -144,14 +143,24 @@ const MultiCityFlights = () => {
       </div>
 
       {flightForms.length < 5 && (
-        <button
-          type='button'
-          onClick={addFlightForm}
-          className='flex items-center gap-2 text-[#6366F1] hover:text-[#4F46E5] transition-colors text-sm font-medium mt-4'
-        >
-          <Plus className='w-4 h-4' />
-          Add another flight
-        </button>
+        <div className='flex items-center gap-4'>
+          <button
+            type='button'
+            onClick={addFlightForm}
+            className='flex items-center gap-2 text-[#6366F1] hover:text-[#4F46E5] transition-colors text-sm font-medium mt-4'
+          >
+            <Plus className='w-4 h-4' />
+            Add another flight
+          </button>
+          <button
+            type='button'
+            onClick={addFlightForm}
+            className='flex items-center gap-1 text-[#d54545] hover:text-[#6f2525] transition-colors text-sm font-medium mt-4'
+          >
+            <Minus className='w-4 h-4' />
+            Clear data
+          </button>
+        </div>
       )}
 
       <input

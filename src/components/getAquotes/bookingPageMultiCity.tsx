@@ -3,8 +3,9 @@ import Lenis from "@studio-freight/lenis";
 import QuoteLayout from "@/src/layout/quoteLayout";
 import BookingForm from "@/src/components/getAquotes/flightBookingForm";
 import FlightBookingInfo from "./flightBookingInfo";
+import MultiCityBookingInfosForm from "./multiCityBookingInfos";
 
-const FlightBookingPage = () => {
+const MultiCityBookingPageScreen = () => {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -29,9 +30,9 @@ const FlightBookingPage = () => {
 
   return (
     <QuoteLayout>
-      <FlightBookingInfo />
+      <MultiCityBookingInfosForm />
     </QuoteLayout>
   );
 };
 
-export default FlightBookingPage;
+export default MultiCityBookingPageScreen;

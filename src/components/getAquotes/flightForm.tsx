@@ -12,7 +12,7 @@ const FlightForm = () => {
 
   const handleContinue = () => {
     if (selectedService === "yacht") {
-      router.push("/multicity-booking");
+      router.push("/yacht-booking-infos");
     } else {
       router.push("/calculate-flight");
     }

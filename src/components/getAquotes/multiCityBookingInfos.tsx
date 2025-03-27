@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -12,7 +12,33 @@ const SERVICE_ID = process.env.NEXT_PUBLIC_SERVICE_ID;
 const TEMPLATE_ID = process.env.NEXT_PUBLIC_FLIGHT_TEMPLATE_ID;
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_KEY;
 
-const FlightBookingInfo = () => {
+interface BookingFormData {
+  title: string;
+  firstName: string;
+  surname: string;
+  email: string;
+  phone: string;
+  country: string;
+  company?: string;
+  message: string;
+}
+
+interface AirportInfo {
+  code: string;
+  name: string;
+  location: string | null;
+  time?: string;
+}
+
+interface MultiCityFlightData {
+  date: string;
+  from: string;
+  fromAirport: AirportInfo;
+  toAirport: AirportInfo;
+  passengers: string;
+}
+
+const MultiCityBookingInfosForm = () => {
   const router = useRouter();
   const titleOptions = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
 
@@ -20,8 +46,7 @@ const FlightBookingInfo = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
-    watch
+    setValue
   } = useForm<BookingFormData>({
     defaultValues: {
       title: "",
@@ -35,35 +60,31 @@ const FlightBookingInfo = () => {
     }
   });
 
-  const [flightInfo, setFlightInfo] = React.useState<FlightDetails>({
-    from: {
-      airport: "Loading...",
-      code: "...",
-      departure: "Loading...",
-      utc: "..."
-    },
-    to: {
-      airport: "Loading...",
-      code: "...",
-      arrival: "Loading...",
-      utc: "..."
-    },
-    flightTime: {
-      hours: 0,
-      distance: "..."
-    }
-  });
+  const [flightRoutes, setFlightRoutes] = useState<
+    {
+      from: {
+        airport: string;
+        code: string;
+        departure: string;
+        utc: string;
+      };
+      to: {
+        airport: string;
+        code: string;
+        arrival: string;
+        utc: string;
+      };
+    }[]
+  >([]);
 
-  const getFlightData = (): StoredFlightData | null => {
+  const getMultiCityFlightData = (): MultiCityFlightData[] | null => {
     if (typeof window === "undefined") return null;
 
     try {
-      const data = localStorage.getItem("flightFormData");
-      if (!data) return null;
-
-      return JSON.parse(data) as StoredFlightData;
+      const data = localStorage.getItem("multiCityFlightData");
+      return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("Error retrieving flight data:", error);
+      console.error("Error retrieving multicity flight data:", error);
       return null;
     }
   };
@@ -73,9 +94,7 @@ const FlightBookingInfo = () => {
 
     try {
       const data = localStorage.getItem("flightCalculation");
-      if (!data) return null;
-
-      return JSON.parse(data);
+      return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error("Error retrieving flight calculation:", error);
       return null;
@@ -97,40 +116,45 @@ const FlightBookingInfo = () => {
   }, [setValue]);
 
   useEffect(() => {
-    const storedData = getFlightData();
+    const storedData = getMultiCityFlightData();
     const calculationData = getFlightCalculation();
 
-    if (!storedData) {
+    if (!storedData || storedData.length === 0) {
       console.error("No flight data found in local storage");
       return;
     }
 
-    const flightDate = storedData.date ? new Date(storedData.date) : new Date();
-    const arrivalDate = new Date(flightDate.getTime() + 9 * 60 * 60 * 1000);
-    const distance = calculationData?.distance || "11 064 km";
+    // Map through stored data to create routes
+    const routes = storedData.map((flightData, index, array) => {
+      const flightDate = flightData.date
+        ? new Date(flightData.date)
+        : new Date();
+      const nextFlightDate =
+        index < array.length - 1
+          ? new Date(array[index + 1].date)
+          : new Date(flightDate.getTime() + 9 * 60 * 60 * 1000);
 
-    setFlightInfo({
-      from: {
-        airport: storedData.fromAirport.name || "Unknown Airport",
-        code: `${storedData.fromAirport.code || "???"} (${
-          storedData.fromAirport.location
-        })`,
-        departure: `${format(flightDate, "dd MMM, HH:mm")} LT`,
-        utc: `${format(flightDate, "HH:mm")} UTC`
-      },
-      to: {
-        airport: storedData.toAirport.name || "Unknown Airport",
-        code: `${storedData.toAirport.code || "???"} (${
-          storedData.toAirport.location
-        })`,
-        arrival: `${format(arrivalDate, "dd MMM, HH:mm")} LT`,
-        utc: `${format(arrivalDate, "HH:mm")} UTC`
-      },
-      flightTime: {
-        hours: calculationData?.flightTime?.hours || 9,
-        distance: distance
-      }
+      return {
+        from: {
+          airport: flightData.fromAirport.name || "Unknown Airport",
+          code: `${flightData.fromAirport.code || "???"} (${
+            flightData.fromAirport.location
+          })`,
+          departure: `${format(flightDate, "dd MMM, HH:mm")} LT`,
+          utc: `${format(flightDate, "HH:mm")} UTC`
+        },
+        to: {
+          airport: flightData.toAirport.name || "Unknown Airport",
+          code: `${flightData.toAirport.code || "???"} (${
+            flightData.toAirport.location
+          })`,
+          arrival: `${format(nextFlightDate, "dd MMM, HH:mm")} LT`,
+          utc: `${format(nextFlightDate, "HH:mm")} UTC`
+        }
+      };
     });
+
+    setFlightRoutes(routes);
   }, []);
 
   const onSubmit = async (data: BookingFormData) => {
@@ -138,36 +162,54 @@ const FlightBookingInfo = () => {
     const loadingToast = toast.loading("Submitting your booking...");
 
     try {
-      const flightData = getFlightData();
+      const flightData = getMultiCityFlightData();
       const calculationData = getFlightCalculation();
+
+      if (!flightData || flightData.length === 0) {
+        throw new Error("No flight data available");
+      }
+
+      // Prepare email data with multiple routes
+      const routesEmail = flightData.map((route, index) => ({
+        [`fromAirport_${index + 1}`]: route.fromAirport.name,
+        [`fromCode_${
+          index + 1
+        }`]: `${route.fromAirport.code} (${route.fromAirport.location})`,
+        [`toAirport_${index + 1}`]: route.toAirport.name,
+        [`toCode_${
+          index + 1
+        }`]: `${route.toAirport.code} (${route.toAirport.location})`,
+        [`departureTime_${index + 1}`]: format(
+          new Date(route.date),
+          "dd MMM, HH:mm LT"
+        )
+      }));
+
+      // Merge routes info into a single object
+      const routesEmailData = routesEmail.reduce(
+        (acc, route) => ({ ...acc, ...route }),
+        {}
+      );
+
+      const emailData = {
+        ...data,
+        title: data.title,
+        company: data.company || "Not specified",
+        message: data.message || "No message provided",
+
+        passengers: flightData[0].passengers || "Not specified",
+        totalRoutes: flightData.length,
+
+        ...routesEmailData,
+
+        to_name: "Flight Booking Team",
+        reply_to: data.email
+      };
 
       const result = await emailjs.send(
         SERVICE_ID as string,
         TEMPLATE_ID as string,
-        {
-          title: data.title,
-          firstName: data.firstName,
-          surname: data.surname,
-          email: data.email,
-          phone: data.phone,
-          country: data.country,
-          company: data.company || "Not specified",
-          message: data.message || "No message provided",
-
-          fromAirport: flightInfo.from.airport,
-          fromCode: flightInfo.from.code,
-          toAirport: flightInfo.to.airport,
-          toCode: flightInfo.to.code,
-          departureTime: flightInfo.from.departure,
-          arrivalTime: flightInfo.to.arrival,
-          flightHours: flightInfo.flightTime.hours,
-          distance: flightInfo.flightTime.distance,
-          passengers: flightData?.passengers || "Not specified",
-          date: flightData?.date || "Not specified",
-
-          to_name: "Flight Booking Team",
-          reply_to: data.email
-        },
+        emailData,
         PUBLIC_KEY
       );
 
@@ -190,36 +232,42 @@ const FlightBookingInfo = () => {
     router.push("/");
   };
 
+  console.log("routes routes=======:>> ", flightRoutes);
+
   return (
     <div className='max-w-5xl mx-auto p-6 space-y-8 text-gray-900'>
       <Toaster position='bottom-right' richColors />
 
       <div className='space-y-6'>
         <h2 className='text-2xl font-medium text-gray-900'>
-          Flight information
+          Multicity Booking informations
         </h2>
+        {flightRoutes.map((route, index) => (
+          <div
+            key={index}
+            className='grid grid-cols-1 md:grid-cols-3 lg:gap-24 gap-8 items-center'
+          >
+            <div className='bg-white rounded-lg p-4 border border-[#BFBFBF]'>
+              <div className='space-y-1 pb-2'>
+                <p className='text-sm text-gray-500'>Airport</p>
+                <p className='font-medium'>{route.from.airport}</p>
+                <p className='lg:text-xl font-bold'>{route.from.code}</p>
+              </div>
+            </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 lg:gap-24 gap-8 items-center'>
-          <div className='bg-white rounded-lg p-4 border border-[#BFBFBF]'>
-            <div className='space-y-1 pb-2'>
-              <p className='text-sm text-gray-500'>Airport</p>
-              <p className='font-medium'>{flightInfo.from.airport}</p>
-              <p className='lg:text-xl font-bold'>{flightInfo.from.code}</p>
+            <div className=''>
+              <IoAirplaneSharp className='w-full h-6 text-[#b5b5b5]' />
+            </div>
+
+            <div className='bg-white rounded-lg p-4 border border-[#BFBFBF]'>
+              <div className='space-y-1 pb-2'>
+                <p className='text-sm text-gray-500'>Airport</p>
+                <p className='font-medium'>{route.to.airport}</p>
+                <p className='lg:text-xl font-bold'>{route.to.code}</p>
+              </div>
             </div>
           </div>
-
-          <div className=''>
-            <IoAirplaneSharp className='w-full h-6 text-[#b5b5b5]' />
-          </div>
-
-          <div className='bg-white rounded-lg p-4 border border-[#BFBFBF]'>
-            <div className='space-y-1 pb-2'>
-              <p className='text-sm text-gray-500'>Airport</p>
-              <p className='font-medium'>{flightInfo.to.airport}</p>
-              <p className='lg:text-xl font-bold'>{flightInfo.to.code}</p>
-            </div>
-          </div>
-        </div>
+        ))}
 
         <div className='text-sm'>
           Do you want to change flight information?{" "}
@@ -394,4 +442,4 @@ const FlightBookingInfo = () => {
   );
 };
 
-export default FlightBookingInfo;
+export default MultiCityBookingInfosForm;

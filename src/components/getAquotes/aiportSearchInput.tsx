@@ -26,6 +26,7 @@ interface AirportSearchInputProps {
   };
   onChange?: (value: any, airportData?: any) => void;
   disabled?: boolean;
+  optional?: boolean; // New optional prop
 }
 
 const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
@@ -37,7 +38,8 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
   value: externalValue,
   initialAirport,
   onChange: externalOnChange,
-  disabled = false
+  disabled = false,
+  optional = false // Default to false
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { airports, fetchAllAirports, filterAirports } = useAirportSearch();
@@ -109,7 +111,9 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
         <Controller
           name={name}
           control={control}
-          rules={{ required: `${label} is required` }}
+          rules={{
+            required: false
+          }}
           render={({ field }) => {
             const currentValue =
               externalValue !== undefined ? externalValue : field.value;

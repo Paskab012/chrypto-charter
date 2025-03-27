@@ -729,6 +729,11 @@
   resolved "https://registry.yarnpkg.com/@wojtekmaj/date-utils/-/date-utils-1.5.1.tgz#c3cd67177ac781cfa5736219d702a55a2aea5f2b"
   integrity sha512-+i7+JmNiE/3c9FKxzWFi2IjRJ+KzZl1QPu6QNrsgaa2MuBgXvUy4gA1TVzf/JMdIIloB76xSKikTWuyYAIVLww==
 
+airport-iata-codes@^1.0.13:
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/airport-iata-codes/-/airport-iata-codes-1.0.13.tgz#69b20be8758a7d1a3e7b31ef4697d79225f65b6a"
+  integrity sha512-YX3qp76zwmrAJydunFPXHDwasPbtKA2JeQywI0AQgkvce6SUcLlX5wNs9uoSj6n8FQZiz7NvAh6eqmb/MV5dfA==
+
 ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"

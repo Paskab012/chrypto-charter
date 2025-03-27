@@ -161,7 +161,7 @@ const MultiCityBookingInfo = () => {
       <Toaster position='bottom-right' richColors />
       <div className='space-y-6'>
         <h2 className='text-2xl font-medium text-gray-900'>
-          Booking information
+          Yacht Booking information
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>

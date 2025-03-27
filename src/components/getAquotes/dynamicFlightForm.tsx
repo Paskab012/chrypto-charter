@@ -67,15 +67,12 @@ const DynamicFlightForm = ({
       return;
     }
 
-    // Ensure we have airport code data
     const airportCode =
       airportData?.airport_code ||
       (typeof value === "object" ? value.airport_code : value);
 
-    // Update the form with the airport code
     updateFlightForm(form.id, "from", airportCode || value);
 
-    // If we have complete airport data, update the fromAirport object
     if (airportData) {
       const airportInfo = {
         code: airportData.airport_code,
@@ -94,15 +91,12 @@ const DynamicFlightForm = ({
       return;
     }
 
-    // Ensure we have airport code data
     const airportCode =
       airportData?.airport_code ||
       (typeof value === "object" ? value.airport_code : value);
 
-    // Update the form with the airport code
     updateFlightForm(form.id, "to", airportCode || value);
 
-    // If we have complete airport data, update the toAirport object
     if (airportData) {
       const airportInfo = {
         code: airportData.airport_code,
@@ -129,6 +123,7 @@ const DynamicFlightForm = ({
           initialAirport={form.fromAirport}
           onChange={handleFromAirportChange}
           disabled={!isFirstFlight}
+          optional={index !== 0}
         />
       </div>
 
@@ -142,6 +137,7 @@ const DynamicFlightForm = ({
           value={form.to || (form.toAirport ? form.toAirport.code : "")}
           initialAirport={form.toAirport}
           onChange={handleToAirportChange}
+          optional={index !== 0}
         />
       </div>
 

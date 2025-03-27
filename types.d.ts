@@ -145,3 +145,50 @@ interface FlightForm {
     location: string | null;
   };
 }
+
+interface BookingFormData {
+  title: string;
+  firstName: string;
+  surname: string;
+  email: string;
+  phone: string;
+  country: string;
+  company?: string;
+  message: string;
+}
+
+interface FlightDetails {
+  from: {
+    airport: string;
+    code: string;
+    departure: string;
+    utc: string;
+  };
+  to: {
+    airport: string;
+    code: string;
+    arrival: string;
+    utc: string;
+  };
+  flightTime: {
+    hours: number;
+    distance: string;
+  };
+}
+
+interface StoredFlightData {
+  from: string;
+  to: string;
+  passengers: string;
+  date: string;
+  fromAirport: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  toAirport: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+}
