@@ -192,3 +192,29 @@ interface StoredFlightData {
     location: string | null;
   };
 }
+
+interface BookingFormData {
+  title: string;
+  firstName: string;
+  surname: string;
+  email: string;
+  phone: string;
+  country: string;
+  company?: string;
+  message: string;
+}
+
+interface AirportInfo {
+  code: string;
+  name: string;
+  location: string | null;
+  time?: string;
+}
+
+interface MultiCityFlightData {
+  date: string;
+  from: string;
+  fromAirport: AirportInfo;
+  toAirport: AirportInfo;
+  passengers: string;
+}

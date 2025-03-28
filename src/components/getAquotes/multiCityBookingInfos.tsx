@@ -8,35 +8,9 @@ import { useForm } from "react-hook-form";
 import emailjs from "@emailjs/browser";
 import { toast, Toaster } from "sonner";
 
-const SERVICE_ID = process.env.NEXT_PUBLIC_SERVICE_ID;
-const TEMPLATE_ID = process.env.NEXT_PUBLIC_FLIGHT_TEMPLATE_ID;
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_KEY;
-
-interface BookingFormData {
-  title: string;
-  firstName: string;
-  surname: string;
-  email: string;
-  phone: string;
-  country: string;
-  company?: string;
-  message: string;
-}
-
-interface AirportInfo {
-  code: string;
-  name: string;
-  location: string | null;
-  time?: string;
-}
-
-interface MultiCityFlightData {
-  date: string;
-  from: string;
-  fromAirport: AirportInfo;
-  toAirport: AirportInfo;
-  passengers: string;
-}
+const SERVICE_ID = process.env.NEXT_PUBLIC_SERVICE_ID_MULTICITY;
+const TEMPLATE_ID = process.env.NEXT_PUBLIC_FLIGHT_TEMPLATE_ID_MULTICITY;
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_KEY_MULTICITY;
 
 const MultiCityBookingInfosForm = () => {
   const router = useRouter();
@@ -124,7 +98,6 @@ const MultiCityBookingInfosForm = () => {
       return;
     }
 
-    // Map through stored data to create routes
     const routes = storedData.map((flightData, index, array) => {
       const flightDate = flightData.date
         ? new Date(flightData.date)
@@ -169,42 +142,120 @@ const MultiCityBookingInfosForm = () => {
         throw new Error("No flight data available");
       }
 
-      // Prepare email data with multiple routes
-      const routesEmail = flightData.map((route, index) => ({
-        [`fromAirport_${index + 1}`]: route.fromAirport.name,
-        [`fromCode_${
-          index + 1
-        }`]: `${route.fromAirport.code} (${route.fromAirport.location})`,
-        [`toAirport_${index + 1}`]: route.toAirport.name,
-        [`toCode_${
-          index + 1
-        }`]: `${route.toAirport.code} (${route.toAirport.location})`,
-        [`departureTime_${index + 1}`]: format(
-          new Date(route.date),
-          "dd MMM, HH:mm LT"
-        )
-      }));
-
-      // Merge routes info into a single object
-      const routesEmailData = routesEmail.reduce(
-        (acc, route) => ({ ...acc, ...route }),
-        {}
-      );
-
-      const emailData = {
-        ...data,
+      const emailData: Record<string, any> = {
         title: data.title,
+        firstName: data.firstName,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
         company: data.company || "Not specified",
         message: data.message || "No message provided",
 
         passengers: flightData[0].passengers || "Not specified",
-        totalRoutes: flightData.length,
-
-        ...routesEmailData,
 
         to_name: "Flight Booking Team",
-        reply_to: data.email
+        reply_to: data.email,
+
+        route2_fromAirport: "",
+        route2_fromCode: "",
+        route2_toAirport: "",
+        route2_toCode: "",
+        route2_departureTime: "",
+        route2_display: "display: none;",
+
+        route3_fromAirport: "",
+        route3_fromCode: "",
+        route3_toAirport: "",
+        route3_toCode: "",
+        route3_departureTime: "",
+        route3_display: "display: none;",
+
+        route4_fromAirport: "",
+        route4_fromCode: "",
+        route4_toAirport: "",
+        route4_toCode: "",
+        route4_departureTime: "",
+        route4_display: "display: none;",
+
+        route5_fromAirport: "",
+        route5_fromCode: "",
+        route5_toAirport: "",
+        route5_toCode: "",
+        route5_departureTime: "",
+        route5_display: "display: none;"
       };
+
+      // Route 1 (always present)
+      if (flightData.length >= 1) {
+        const route1 = flightData[0];
+        emailData.route1_fromAirport = route1.fromAirport.name;
+        emailData.route1_fromCode = route1.fromAirport.code;
+        emailData.route1_toAirport = route1.toAirport.name;
+        emailData.route1_toCode = route1.toAirport.code;
+        emailData.route1_departureTime = format(
+          new Date(route1.date),
+          "dd MMM, HH:mm LT"
+        );
+      }
+
+      // Route 2
+      if (flightData.length >= 2) {
+        const route2 = flightData[1];
+        emailData.route2_fromAirport = route2.fromAirport.name;
+        emailData.route2_fromCode = route2.fromAirport.code;
+        emailData.route2_toAirport = route2.toAirport.name;
+        emailData.route2_toCode = route2.toAirport.code;
+        emailData.route2_departureTime = format(
+          new Date(route2.date),
+          "dd MMM, HH:mm LT"
+        );
+        emailData.route2_display = "display: block;";
+      }
+
+      // Route 3
+      if (flightData.length >= 3) {
+        const route3 = flightData[2];
+        emailData.route3_fromAirport = route3.fromAirport.name;
+        emailData.route3_fromCode = route3.fromAirport.code;
+        emailData.route3_toAirport = route3.toAirport.name;
+        emailData.route3_toCode = route3.toAirport.code;
+        emailData.route3_departureTime = format(
+          new Date(route3.date),
+          "dd MMM, HH:mm LT"
+        );
+        emailData.route3_display = "display: block;";
+      }
+
+      // Route 4
+      if (flightData.length >= 4) {
+        const route4 = flightData[3];
+        emailData.route4_fromAirport = route4.fromAirport.name;
+        emailData.route4_fromCode = route4.fromAirport.code;
+        emailData.route4_toAirport = route4.toAirport.name;
+        emailData.route4_toCode = route4.toAirport.code;
+        emailData.route4_departureTime = format(
+          new Date(route4.date),
+          "dd MMM, HH:mm LT"
+        );
+        emailData.route4_display = "display: block;";
+      }
+
+      // Route 5
+      if (flightData.length >= 5) {
+        const route5 = flightData[4];
+        emailData.route5_fromAirport = route5.fromAirport.name;
+        emailData.route5_fromCode = route5.fromAirport.code;
+        emailData.route5_toAirport = route5.toAirport.name;
+        emailData.route5_toCode = route5.toAirport.code;
+        emailData.route5_departureTime = format(
+          new Date(route5.date),
+          "dd MMM, HH:mm LT"
+        );
+        emailData.route5_display = "display: block;";
+      }
+
+      console.log("Email data being sent:", emailData);
 
       const result = await emailjs.send(
         SERVICE_ID as string,
@@ -227,12 +278,9 @@ const MultiCityBookingInfosForm = () => {
       console.error("Error sending email:", error);
     }
   };
-
   const handleChangeFlightInfo = () => {
     router.push("/");
   };
-
-  console.log("routes routes=======:>> ", flightRoutes);
 
   return (
     <div className='max-w-5xl mx-auto p-6 space-y-8 text-gray-900'>

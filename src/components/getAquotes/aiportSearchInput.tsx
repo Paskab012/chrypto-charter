@@ -55,6 +55,7 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
     setError,
     clearErrors
   } = useFormContext();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const hasInitialized = useRef(false);
 
   const filteredAirports = filterAirports(searchQuery);
@@ -116,7 +117,6 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
     if (!value) return null;
 
     try {
-      // Handle JSON string values
       if (typeof value === "string") {
         if (value.startsWith("{")) {
           const parsed = JSON.parse(value);
@@ -179,7 +179,7 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
           name={name}
           control={control}
           rules={{
-            required: !optional
+            required: false
           }}
           render={({ field }) => {
             const currentValue =
@@ -257,7 +257,6 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
                   try {
                     const selected = JSON.parse(value);
 
-                    // Validate airport uniqueness
                     if (!validateAirportUniqueness(selected)) {
                       return;
                     }
@@ -303,11 +302,17 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
                   <SelectContent className='max-h-[300px] p-0' align='start'>
                     <div className='sticky top-0 p-2 bg-white border-b'>
                       <input
+                        ref={searchInputRef}
                         type='text'
                         placeholder='Search airports...'
                         className='w-full p-2 text-sm bg-gray-50 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                          const query = e.target.value;
+                          setSearchQuery(query);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
                       />
                     </div>
                     <ScrollArea className='h-[200px] p-2'>
