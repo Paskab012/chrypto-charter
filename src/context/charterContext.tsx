@@ -4,13 +4,14 @@ import { createContext, useContext, useState, ReactNode } from "react";
 type ServiceType = "jet" | "yacht";
 type FlightType = "one-way" | "return" | "multi-city";
 
-interface FlightForm {
-  id: string;
-  from: string;
-  to: string;
-  passengers: string;
-  date: Date | undefined;
-}
+// interface FlightForm {
+//   toAirport: any;
+//   id: string;
+//   from: string;
+//   to: string;
+//   passengers: string;
+//   date: Date | undefined;
+// }
 
 interface FlightCalculation {
   time: {

@@ -59,7 +59,7 @@ const QuoteLayout = ({ children }: QuoteLayoutProps) => {
           variants={fadeIn}
           initial='initial'
           animate='animate'
-          className=' max-w-5xl  bg-white p-6 shadow-xl sm:p-8'
+          className=' max-w-7xl  bg-white p-6 shadow-xl sm:p-8'
         >
           {children}
         </motion.div>

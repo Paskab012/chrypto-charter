@@ -20,7 +20,7 @@ const SelectTrigger = React.forwardRef<
       "flex h-11 w-full items-center justify-between rounded-lg text-gray-800 bg-[#F6F6F6] px-3 py-2",
       "border border-[#BFBFBF] text-sm",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
+      "focus:outline-none ",
       className
     )}
     {...props}
@@ -84,7 +84,6 @@ const SelectItem = React.forwardRef<
     className={cn(
       "relative flex w-full cursor-pointer text-gray-800 select-none items-center rounded-md py-2 pl-8 pr-2",
       "text-sm outline-none",
-      "focus:bg-purple-50 focus:text-purple-900",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}

@@ -1,4 +1,3 @@
-// Calendar.tsx
 import { cn } from "@/src/lib/utils";
 import React from "react";
 import ReactCalendar from "react-calendar";
@@ -22,6 +21,9 @@ export function Calendar({
   onSelect,
   ...props
 }: CalendarProps) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const handleDateChange = (
     value: any,
     event: React.MouseEvent<HTMLButtonElement>
@@ -34,9 +36,15 @@ export function Calendar({
     if (mode === "single" && value instanceof Date) {
       onSelect?.(value);
     } else if (Array.isArray(value)) {
-      // Handle range selection if needed
       onSelect?.(value[0]);
     }
+  };
+
+  const disablePastDates = ({ date }: { date: Date }) => {
+    const currentDate = new Date(date);
+    currentDate.setHours(0, 0, 0, 0);
+
+    return currentDate < today;
   };
 
   return (
@@ -59,6 +67,7 @@ export function Calendar({
             "bg-purple-600 text-white hover:bg-purple-500"
         )
       }
+      tileDisabled={disablePastDates}
       navigationLabel={({ date }) =>
         date.toLocaleString("default", { month: "long", year: "numeric" })
       }
@@ -94,6 +103,7 @@ export function Calendar({
       }
       view='month'
       minDetail='month'
+      minDate={today}
     />
   );
 }

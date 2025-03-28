@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios, { AxiosInstance } from "axios";
 
 interface FlightCalculatorInput {
   departure_airport: string;
@@ -29,6 +30,21 @@ interface CalculationResult {
   error?: string;
 }
 
+const createAxiosInstance = (): AxiosInstance => {
+  const apiUrl = process.env.NEXT_PUBLIC_FLIGHT_CALCULATOR_API;
+  const authToken = process.env.NEXT_PUBLIC_FLIGHT_CALCULATOR_TOKEN;
+
+  return axios.create({
+    baseURL: apiUrl,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Token ${authToken}`
+    },
+    timeout: 10000
+  });
+};
+
 export const useFlightCalculator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,32 +56,51 @@ export const useFlightCalculator = () => {
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_FLIGHT_CALCULATOR_API;
-      const authToken = process.env.NEXT_PUBLIC_FLIGHT_CALCULATOR_TOKEN;
+      const axiosInstance = createAxiosInstance();
 
-      if (!apiUrl || !authToken) {
-        throw new Error("Missing API configuration");
-      }
-
-      const response = await fetch(`${apiUrl}/flight_calculator/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${authToken}`
-        },
-        body: JSON.stringify(data)
+      console.log("Making flight calculation request:", {
+        url: "/flight_calculator/",
+        data: data
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to calculate flight");
+      const response = await axiosInstance.post("/flight_calculator/", {
+        departure_airport: data.departure_airport,
+        arrival_airport: data.arrival_airport,
+        aircraft: data.aircraft,
+        pax: data.pax,
+        airway_time: data.airway_time
+      });
+
+      console.log("Flight calculation response:", response.data);
+
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.error("Flight calculation failed:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          config: {
+            url: err.config?.url,
+            method: err.config?.method,
+            data: err.config?.data
+          }
+        });
+
+        const errorMessage =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Failed to calculate flight";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
       }
 
-      const result: FlightCalculatorResponse = await response.json();
-      return { success: true, data: result };
-    } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      console.error("Unexpected error:", err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -83,14 +118,39 @@ export const useFlightCalculator = () => {
 export const handleFlightCalculation = async (
   formData: any,
   calculateFlight: any
-) => {
-  const calculatorInput: FlightCalculatorInput = {
-    departure_airport: formData.from,
-    arrival_airport: formData.to,
-    aircraft: "Embraer Legacy 650",
-    pax: parseInt(formData.passengers),
-    airway_time: true
-  };
+): Promise<CalculationResult> => {
+  try {
+    if (!formData.departure_airport || !formData.arrival_airport) {
+      throw new Error("Airport codes are required");
+    }
 
-  return await calculateFlight(calculatorInput);
+    if (!formData.pax || isNaN(Number(formData.pax))) {
+      throw new Error("Valid passenger count is required");
+    }
+
+    const calculatorInput: FlightCalculatorInput = {
+      departure_airport: String(formData.departure_airport).toUpperCase(),
+      arrival_airport: String(formData.arrival_airport).toUpperCase(),
+      aircraft: "Embraer Legacy 650",
+      pax: Number(formData.pax),
+      airway_time: true
+    };
+
+    console.log("Prepared flight calculation request:", calculatorInput);
+
+    const result = await calculateFlight(calculatorInput);
+
+    console.log("Flight calculation result:", result);
+
+    return result;
+  } catch (error) {
+    console.error("Flight calculation preparation failed:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to prepare flight calculation"
+    };
+  }
 };

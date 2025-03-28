@@ -18,6 +18,8 @@ import {
   useFlightCalculator
 } from "@/src/hooks/useFlightCalculator";
 import { toast } from "sonner";
+import TimeSelect from "./timeSelect";
+import AirportSearchInput from "./aiportSearchInput";
 
 const SingleFlightForm = () => {
   const {
@@ -28,10 +30,9 @@ const SingleFlightForm = () => {
   } = useFormContext();
 
   const router = useRouter();
-  const { setFlightCalculation } = useCharter();
+  const { flightType, setFlightCalculation } = useCharter();
   const { calculateFlight, isLoading, error } = useFlightCalculator();
 
-  // Watch all fields to enable/disable the submit button
   const formValues = watch();
   const isFormValid =
     formValues.from &&
@@ -39,87 +40,38 @@ const SingleFlightForm = () => {
     formValues.passengers &&
     formValues.date;
 
-  const onSubmit = async (data: any) => {
-    try {
-      const result = await handleFlightCalculation(data, calculateFlight);
-
-      if (result.success && result.data) {
-        setFlightCalculation(result.data);
-        router.push("/flight-booking-info");
-      } else {
-        toast.error(result.error || "Failed to calculate flight details");
-      }
-    } catch (err) {
-      toast.error("An error occurred while calculating flight details");
-    }
-  };
+  const fromLabel = flightType === "return" ? "To" : "From";
+  const toLabel = flightType === "return" ? "From" : "To";
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-8 gap-4'>
-      <div className='space-y-2 md:col-span-3'>
-        <label className='text-sm font-medium text-gray-900'>From</label>
-        <div className='relative'>
-          <Controller
-            name='from'
-            control={control}
-            rules={{ required: "Origin is required" }}
-            render={({ field }) => (
-              <input
-                {...field}
-                type='text'
-                placeholder='Type airport, city or country'
-                className={`w-full rounded-lg bg-[#F6F6F6] border ${
-                  errors.from ? "border-red-500" : "border-[#BFBFBF]"
-                } p-3 pl-10 text-sm placeholder:text-gray-700`}
-              />
-            )}
-          />
-          <Image
-            width={4}
-            height={4}
-            alt='takeoff'
-            src='/charter/takeoff.svg'
-            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-          />
-        </div>
-        {errors.from && (
-          <span className='text-xs text-red-500'>
-            {errors.from.message as string}
-          </span>
-        )}
+    <div className='grid grid-cols-1 md:grid-cols-12 gap-4'>
+      <div className='md:col-span-4'>
+        <AirportSearchInput
+          name='from'
+          label={fromLabel}
+          placeholder='Type airport, city or country'
+          icon='/charter/takeoff.svg'
+          iconAlt='takeoff'
+          preventDuplicateWith={{
+            name: "from",
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
+        />
       </div>
-
-      <div className='space-y-2 md:col-span-2'>
-        <label className='text-sm font-medium text-gray-900'>To</label>
-        <div className='relative'>
-          <Controller
-            name='to'
-            control={control}
-            rules={{ required: "Destination is required" }}
-            render={({ field }) => (
-              <input
-                {...field}
-                type='text'
-                placeholder='Type airport, city or country'
-                className={`w-full rounded-lg bg-[#F6F6F6] border ${
-                  errors.to ? "border-red-500" : "border-[#BFBFBF]"
-                } p-3 pl-10 text-sm placeholder:text-gray-700`}
-              />
-            )}
-          />
-          <Image
-            width={4}
-            height={4}
-            alt='landing'
-            src='/charter/land.svg'
-            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-900'
-          />
-        </div>
-        {errors.to && (
-          <span className='text-xs text-red-500'>
-            {errors.to.message as string}
-          </span>
-        )}
+      <div className='md:col-span-4'>
+        <AirportSearchInput
+          name='to'
+          label={toLabel}
+          placeholder='Type airport, city or country'
+          icon='/charter/land.svg'
+          iconAlt='landing'
+          preventDuplicateWith={{
+            name: "to",
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
+        />
       </div>
 
       <div className='space-y-2 md:col-span-1'>
@@ -169,7 +121,9 @@ const SingleFlightForm = () => {
                     errors.date ? "border-red-500" : "border-[#BFBFBF]"
                   } border p-3 text-sm`}
                 >
-                  {field.value ? format(field.value, "PPP") : "Select date"}
+                  {field.value
+                    ? format(field.value, "dd/MM/yyyy")
+                    : "Select date"}
                   <CalendarIcon className='h-4 w-4 text-gray-400' />
                 </button>
               </PopoverTrigger>
@@ -178,7 +132,6 @@ const SingleFlightForm = () => {
                   mode='single'
                   selected={field.value}
                   onSelect={field.onChange}
-                  //   initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -189,6 +142,10 @@ const SingleFlightForm = () => {
             {errors.date.message as string}
           </span>
         )}
+      </div>
+
+      <div className='space-y-2 md:col-span-1'>
+        <TimeSelect />
       </div>
     </div>
   );
