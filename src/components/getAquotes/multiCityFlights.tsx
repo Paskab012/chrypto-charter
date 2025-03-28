@@ -64,6 +64,26 @@ const MultiCityFlights = () => {
     }
   };
 
+  const clearData = () => {
+    localStorage.removeItem("multiCityFlightData");
+
+    const initialForm: FlightForm = {
+      id: "1",
+      from: "",
+      to: "",
+      passengers: "2",
+      date: undefined,
+      time: undefined,
+      fromAirport: undefined,
+      toAirport: undefined
+    };
+
+    setFlightForms([initialForm]);
+    saveFormsToLocalStorage([initialForm]);
+
+    console.log("Data cleared and reset to initial state");
+  };
+
   const updateFlightForm = (
     id: string,
     field: keyof FlightForm,
@@ -154,7 +174,7 @@ const MultiCityFlights = () => {
           </button>
           <button
             type='button'
-            onClick={addFlightForm}
+            onClick={clearData}
             className='flex items-center gap-1 text-[#d54545] hover:text-[#6f2525] transition-colors text-sm font-medium mt-4'
           >
             <Minus className='w-4 h-4' />

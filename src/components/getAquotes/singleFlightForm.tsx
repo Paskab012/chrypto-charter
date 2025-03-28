@@ -52,6 +52,11 @@ const SingleFlightForm = () => {
           placeholder='Type airport, city or country'
           icon='/charter/takeoff.svg'
           iconAlt='takeoff'
+          preventDuplicateWith={{
+            name: "from",
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
         />
       </div>
       <div className='md:col-span-4'>
@@ -61,6 +66,11 @@ const SingleFlightForm = () => {
           placeholder='Type airport, city or country'
           icon='/charter/land.svg'
           iconAlt='landing'
+          preventDuplicateWith={{
+            name: "to",
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
         />
       </div>
 

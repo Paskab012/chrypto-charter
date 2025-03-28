@@ -26,7 +26,11 @@ interface AirportSearchInputProps {
   };
   onChange?: (value: any, airportData?: any) => void;
   disabled?: boolean;
-  optional?: boolean; // New optional prop
+  optional?: boolean;
+  preventDuplicateWith?: {
+    name: string;
+    getMessage?: (airportName: string) => string;
+  };
 }
 
 const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
@@ -39,13 +43,17 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
   initialAirport,
   onChange: externalOnChange,
   disabled = false,
-  optional = false // Default to false
+  optional = false,
+  preventDuplicateWith
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { airports, fetchAllAirports, filterAirports } = useAirportSearch();
   const {
     control,
-    formState: { errors }
+    formState: { errors },
+    getValues,
+    setError,
+    clearErrors
   } = useFormContext();
   const hasInitialized = useRef(false);
 
@@ -104,6 +112,65 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
     }
   };
 
+  const extractAirportCode = (value: any): string | null => {
+    if (!value) return null;
+
+    try {
+      // Handle JSON string values
+      if (typeof value === "string") {
+        if (value.startsWith("{")) {
+          const parsed = JSON.parse(value);
+          return parsed.id || parsed.code || parsed.airport_code || null;
+        }
+        return value;
+      }
+
+      // Handle object values
+      if (typeof value === "object" && value !== null) {
+        return value.id || value.code || value.airport_code || null;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error extracting airport code:", error);
+      return null;
+    }
+  };
+
+  const validateAirportUniqueness = (selected: any) => {
+    if (!preventDuplicateWith) return true;
+
+    const otherInputName = preventDuplicateWith.name;
+    const otherValue = getValues(otherInputName);
+
+    const selectedAirportCode = extractAirportCode(selected);
+    const otherAirportCode = extractAirportCode(otherValue);
+
+    // Check if airports are the same
+    if (
+      selectedAirportCode &&
+      otherAirportCode &&
+      selectedAirportCode === otherAirportCode
+    ) {
+      const errorMessage = preventDuplicateWith.getMessage
+        ? preventDuplicateWith.getMessage(
+            typeof selected === "object"
+              ? selected.name || selected.airport_name
+              : selected
+          )
+        : `Cannot select the same airport twice`;
+
+      setError(name, {
+        type: "manual",
+        message: errorMessage
+      });
+      return false;
+    }
+
+    clearErrors(name);
+    return true;
+  };
+
   return (
     <div className='space-y-2'>
       <label className='text-sm font-medium text-gray-900'>{label}</label>
@@ -112,7 +179,7 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
           name={name}
           control={control}
           rules={{
-            required: false
+            required: !optional
           }}
           render={({ field }) => {
             const currentValue =
@@ -183,11 +250,18 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
                     } else {
                       field.onChange(null);
                     }
+                    clearErrors(name);
                     return;
                   }
 
                   try {
                     const selected = JSON.parse(value);
+
+                    // Validate airport uniqueness
+                    if (!validateAirportUniqueness(selected)) {
+                      return;
+                    }
+
                     if (externalOnChange) {
                       externalOnChange(selected, selected);
                     } else {

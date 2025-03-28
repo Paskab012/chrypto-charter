@@ -124,6 +124,11 @@ const DynamicFlightForm = ({
           onChange={handleFromAirportChange}
           disabled={!isFirstFlight}
           optional={index !== 0}
+          preventDuplicateWith={{
+            name: `flight-${form.id}-from`,
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
         />
       </div>
 
@@ -138,6 +143,11 @@ const DynamicFlightForm = ({
           initialAirport={form.toAirport}
           onChange={handleToAirportChange}
           optional={index !== 0}
+          preventDuplicateWith={{
+            name: `flight-${form.id}-to`,
+            getMessage: (airportName) =>
+              `From and To airports cannot be the same (${airportName})`
+          }}
         />
       </div>
 

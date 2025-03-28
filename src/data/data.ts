@@ -967,22 +967,6 @@ export const airportsData: AirportResponse = {
       timezone: "Africa/Johannesburg"
     },
     {
-      id: "61",
-      gmt: "3",
-      airport_id: "61",
-      iata_code: "NBO",
-      city_iata_code: "NBO",
-      icao_code: "HKJK",
-      country_iso2: "KE",
-      geoname_id: "6297335",
-      latitude: "-1.3217",
-      longitude: "36.9308",
-      airport_name: "Jomo Kenyatta International Airport",
-      country_name: "Kenya",
-      phone_number: null,
-      timezone: "Africa/Nairobi"
-    },
-    {
       id: "62",
       gmt: "0",
       airport_id: "62",
@@ -2469,22 +2453,6 @@ export const airportsData: AirportResponse = {
       country_name: "Egypt",
       phone_number: null,
       timezone: "Africa/Cairo"
-    },
-    {
-      id: "105",
-      gmt: "3",
-      airport_id: "105",
-      iata_code: "NBO",
-      city_iata_code: "NBO",
-      icao_code: "HKJK",
-      country_iso2: "KE",
-      geoname_id: "6297335",
-      latitude: "-1.3217",
-      longitude: "36.9308",
-      airport_name: "Jomo Kenyatta International Airport",
-      country_name: "Kenya",
-      phone_number: null,
-      timezone: "Africa/Nairobi"
     },
     {
       id: "106",
