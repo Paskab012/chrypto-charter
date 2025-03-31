@@ -327,6 +327,14 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@nwpr/airport-codes@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@nwpr/airport-codes/-/airport-codes-3.0.3.tgz#72a883c2ba97353472c66a582697c6eed162bbdc"
+  integrity sha512-8tWoRdHixVaI7rg77JJxTROqEJ6DwDmbO2Iu7fNG4gxb1aSlmkH5o+ohc6zz6j1Qteu7l5VFH7oU/sGTxyY1aw==
+  dependencies:
+    https "^1.0.0"
+    papaparse "^5.4.1"
+
 "@panva/hkdf@^1.0.2":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@panva/hkdf/-/hkdf-1.2.1.tgz#cb0d111ef700136f4580349ff0226bf25c853f23"
@@ -728,11 +736,6 @@
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/@wojtekmaj/date-utils/-/date-utils-1.5.1.tgz#c3cd67177ac781cfa5736219d702a55a2aea5f2b"
   integrity sha512-+i7+JmNiE/3c9FKxzWFi2IjRJ+KzZl1QPu6QNrsgaa2MuBgXvUy4gA1TVzf/JMdIIloB76xSKikTWuyYAIVLww==
-
-airport-iata-codes@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/airport-iata-codes/-/airport-iata-codes-1.0.13.tgz#69b20be8758a7d1a3e7b31ef4697d79225f65b6a"
-  integrity sha512-YX3qp76zwmrAJydunFPXHDwasPbtKA2JeQywI0AQgkvce6SUcLlX5wNs9uoSj6n8FQZiz7NvAh6eqmb/MV5dfA==
 
 ansi-regex@^2.0.0:
   version "2.1.1"
@@ -1723,6 +1726,11 @@ hasown@^2.0.2:
   dependencies:
     function-bind "^1.1.2"
 
+https@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/https/-/https-1.0.0.tgz#3c37c7ae1a8eeb966904a2ad1e975a194b7ed3a4"
+  integrity sha512-4EC57ddXrkaF0x83Oj8sM6SLQHAWXw90Skqu2M4AEWENZ3F02dFJE/GARA8igO79tcgYqGrD7ae4f5L3um2lgg==
+
 invariant@^2.2.2:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
@@ -2178,6 +2186,11 @@ package-json-from-dist@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/package-json-from-dist/-/package-json-from-dist-1.0.1.tgz#4f1471a010827a86f94cfd9b0727e36d267de505"
   integrity sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==
+
+papaparse@^5.4.1:
+  version "5.5.2"
+  resolved "https://registry.yarnpkg.com/papaparse/-/papaparse-5.5.2.tgz#fb67cc5a03ba8930cb435dc4641a25d6804bd4d7"
+  integrity sha512-PZXg8UuAc4PcVwLosEEDYjPyfWnTEhOrUfdv+3Bx+NuAb+5NhDmXzg5fHWmdCh1mP5p7JAZfFr3IMQfcntNAdA==
 
 path-is-absolute@^1.0.0:
   version "1.0.1"

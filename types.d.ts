@@ -218,3 +218,36 @@ interface MultiCityFlightData {
   toAirport: AirportInfo;
   passengers: string;
 }
+
+interface AirportValue {
+  id?: string;
+  code?: string;
+  name?: string;
+  airport_name?: string;
+  airport_code?: string;
+  location?: string | null;
+  country_name?: string;
+  [key: string]: any;
+}
+
+interface AirportSearchInputProps {
+  name: string;
+  label: string;
+  placeholder: string;
+  icon: string;
+  iconAlt: string;
+  value?: any;
+  initialAirport?: {
+    code: string;
+    name: string;
+    location: string | null;
+  };
+  onChange?: (value: any, airportData?: any) => void;
+  disabled?: boolean;
+  optional?: boolean;
+  preventDuplicateWith?: {
+    name: string;
+    getMessage?: (airportName: string) => string;
+  };
+  disabledAirportCode?: string;
+}

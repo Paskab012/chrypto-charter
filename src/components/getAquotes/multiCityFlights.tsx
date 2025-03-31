@@ -178,7 +178,7 @@ const MultiCityFlights = () => {
             className='flex items-center gap-1 text-[#d54545] hover:text-[#6f2525] transition-colors text-sm font-medium mt-4'
           >
             <Minus className='w-4 h-4' />
-            Clear data
+            Reset
           </button>
         </div>
       )}

@@ -20,13 +20,17 @@ import {
 import { toast } from "sonner";
 import TimeSelect from "./timeSelect";
 import AirportSearchInput from "./aiportSearchInput";
+import { useEffect } from "react";
+import { airports } from "@nwpr/airport-codes";
 
 const SingleFlightForm = () => {
   const {
     control,
     formState: { errors },
     handleSubmit,
-    watch
+    watch,
+    register,
+    setValue
   } = useFormContext();
 
   const router = useRouter();
@@ -34,14 +38,55 @@ const SingleFlightForm = () => {
   const { calculateFlight, isLoading, error } = useFlightCalculator();
 
   const formValues = watch();
-  const isFormValid =
-    formValues.from &&
-    formValues.to &&
-    formValues.passengers &&
-    formValues.date;
+  const isReturnFlight = flightType === "return";
 
-  const fromLabel = flightType === "return" ? "To" : "From";
-  const toLabel = flightType === "return" ? "From" : "To";
+  useEffect(() => {
+    if (isReturnFlight) {
+      register("return_date");
+    }
+  }, [register, isReturnFlight]);
+
+  const isFormValid = isReturnFlight
+    ? formValues.from &&
+      formValues.to &&
+      formValues.passengers &&
+      formValues.date &&
+      formValues.return_date
+    : formValues.from &&
+      formValues.to &&
+      formValues.passengers &&
+      formValues.date;
+
+  const fromValue = formValues.from || "";
+  const toValue = formValues.to || "";
+
+  const extractAirportCode = (value: any) => {
+    if (!value) return null;
+
+    try {
+      if (typeof value === "string") {
+        if (value.startsWith("{") || value.startsWith("[")) {
+          const parsed = JSON.parse(value);
+          return parsed.airport_code || parsed.code || null;
+        }
+        return value;
+      }
+
+      if (typeof value === "object" && value !== null) {
+        return value.airport_code || value.code || null;
+      }
+
+      return null;
+    } catch (error) {
+      return typeof value === "string" ? value : null;
+    }
+  };
+
+  const fromAirportCode = extractAirportCode(fromValue);
+  const toAirportCode = extractAirportCode(toValue);
+
+  const fromLabel = isReturnFlight ? "To" : "From";
+  const toLabel = isReturnFlight ? "From" : "To";
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-12 gap-4'>
@@ -53,10 +98,11 @@ const SingleFlightForm = () => {
           icon='/charter/takeoff.svg'
           iconAlt='takeoff'
           preventDuplicateWith={{
-            name: "from",
+            name: "to",
             getMessage: (airportName) =>
               `From and To airports cannot be the same (${airportName})`
           }}
+          disabledAirportCode={toAirportCode}
         />
       </div>
       <div className='md:col-span-4'>
@@ -67,10 +113,11 @@ const SingleFlightForm = () => {
           icon='/charter/land.svg'
           iconAlt='landing'
           preventDuplicateWith={{
-            name: "to",
+            name: "from",
             getMessage: (airportName) =>
               `From and To airports cannot be the same (${airportName})`
           }}
+          disabledAirportCode={fromAirportCode}
         />
       </div>
 
@@ -106,8 +153,10 @@ const SingleFlightForm = () => {
         )}
       </div>
 
-      <div className='space-y-2 md:col-span-2'>
-        <label className='text-sm font-medium text-gray-700'>Date</label>
+      <div className={`space-y-2  md:col-span-${isReturnFlight ? "1" : "2"}`}>
+        <label className='text-sm font-medium text-gray-700'>
+          {isReturnFlight ? "Departure" : "Date"}
+        </label>
         <Controller
           name='date'
           control={control}
@@ -121,9 +170,7 @@ const SingleFlightForm = () => {
                     errors.date ? "border-red-500" : "border-[#BFBFBF]"
                   } border p-3 text-sm`}
                 >
-                  {field.value
-                    ? format(field.value, "dd/MM/yyyy")
-                    : "Select date"}
+                  {field.value ? format(field.value, "dd/MM/yy") : ""}
                   <CalendarIcon className='h-4 w-4 text-gray-400' />
                 </button>
               </PopoverTrigger>
@@ -132,6 +179,7 @@ const SingleFlightForm = () => {
                   mode='single'
                   selected={field.value}
                   onSelect={field.onChange}
+                  // initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -144,8 +192,56 @@ const SingleFlightForm = () => {
         )}
       </div>
 
+      {isReturnFlight && (
+        <div className='space-y-2 md:col-span-1 '>
+          <label className='text-sm font-medium text-gray-700'>Return</label>
+          <Controller
+            name='return_date'
+            control={control}
+            rules={{
+              required: isReturnFlight ? "Return date is required" : false
+            }}
+            render={({ field }) => (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type='button'
+                    className={`w-full flex items-center justify-between rounded-lg bg-[#F6F6F6] ${
+                      errors.return_date ? "border-red-500" : "border-[#BFBFBF]"
+                    } border p-3 text-sm`}
+                  >
+                    {field.value ? format(field.value, "dd/MM/yy") : ""}
+                    <CalendarIcon className='h-4 w-4 text-gray-400' />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className='w-auto p-0' align='start'>
+                  <Calendar
+                    mode='single'
+                    selected={field.value}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                    }}
+                    tileDisabled={({ date }) => {
+                      const departureDate = formValues.date;
+                      if (!departureDate) return false;
+                      return date < departureDate;
+                    }}
+                    // initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          />
+          {errors.return_date && (
+            <span className='text-xs text-red-500'>
+              {errors.return_date.message as string}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className='space-y-2 md:col-span-1'>
-        <TimeSelect />
+        <TimeSelect name='time' />
       </div>
     </div>
   );

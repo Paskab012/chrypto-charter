@@ -108,6 +108,10 @@ const DynamicFlightForm = ({
     }
   };
 
+  // Get the current airport codes to disable them in the opposite dropdown
+  const fromAirportCode = form.fromAirport?.code || form.from || "";
+  const toAirportCode = form.toAirport?.code || form.to || "";
+
   const isFirstFlight = index === 0;
 
   return (
@@ -125,10 +129,11 @@ const DynamicFlightForm = ({
           disabled={!isFirstFlight}
           optional={index !== 0}
           preventDuplicateWith={{
-            name: `flight-${form.id}-from`,
+            name: `flight-${form.id}-to`,
             getMessage: (airportName) =>
               `From and To airports cannot be the same (${airportName})`
           }}
+          disabledAirportCode={toAirportCode} // Pass the To airport code to disable it
         />
       </div>
 
@@ -144,10 +149,11 @@ const DynamicFlightForm = ({
           onChange={handleToAirportChange}
           optional={index !== 0}
           preventDuplicateWith={{
-            name: `flight-${form.id}-to`,
+            name: `flight-${form.id}-from`,
             getMessage: (airportName) =>
               `From and To airports cannot be the same (${airportName})`
           }}
+          disabledAirportCode={fromAirportCode} // Pass the From airport code to disable it
         />
       </div>
 
