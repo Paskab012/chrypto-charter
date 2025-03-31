@@ -12,8 +12,6 @@ import SingleFlightForm from "./singleFlightForm";
 import MultiCityFlights from "./multiCityFlights";
 import FlightTypeSelector from "./flightSelector";
 
-const allData = require("airport-iata-codes");
-
 interface Airport {
   airport_code: string;
   id: string;

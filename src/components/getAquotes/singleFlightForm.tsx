@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import TimeSelect from "./timeSelect";
 import AirportSearchInput from "./aiportSearchInput";
 import { useEffect } from "react";
+import { airports } from "@nwpr/airport-codes";
 
 const SingleFlightForm = () => {
   const {
@@ -152,7 +153,6 @@ const SingleFlightForm = () => {
         )}
       </div>
 
-      {/* Determine column span based on flight type */}
       <div className={`space-y-2  md:col-span-${isReturnFlight ? "1" : "2"}`}>
         <label className='text-sm font-medium text-gray-700'>
           {isReturnFlight ? "Departure" : "Date"}
@@ -192,7 +192,6 @@ const SingleFlightForm = () => {
         )}
       </div>
 
-      {/* Show return date input only for return flights */}
       {isReturnFlight && (
         <div className='space-y-2 md:col-span-1 '>
           <label className='text-sm font-medium text-gray-700'>Return</label>
@@ -222,12 +221,12 @@ const SingleFlightForm = () => {
                     onSelect={(date) => {
                       field.onChange(date);
                     }}
-                    disabled={(date: number) => {
+                    tileDisabled={({ date }) => {
                       const departureDate = formValues.date;
                       if (!departureDate) return false;
                       return date < departureDate;
                     }}
-                    initialFocus
+                    // initialFocus
                   />
                 </PopoverContent>
               </Popover>
