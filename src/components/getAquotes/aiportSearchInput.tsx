@@ -31,6 +31,7 @@ interface AirportSearchInputProps {
     name: string;
     getMessage?: (airportName: string) => string;
   };
+  disabledAirportCode?: string; // New prop to receive the airport code that should be disabled
 }
 
 const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
@@ -44,7 +45,8 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
   onChange: externalOnChange,
   disabled = false,
   optional = false,
-  preventDuplicateWith
+  preventDuplicateWith,
+  disabledAirportCode // Use the new prop
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { airports, fetchAllAirports, filterAirports } = useAirportSearch();
@@ -325,30 +327,48 @@ const AirportSearchInput: React.FC<AirportSearchInputProps> = ({
                           No airport found matching "{searchQuery}"
                         </div>
                       ) : (
-                        filteredAirports.map((airport) => (
-                          <SelectItem
-                            key={airport.id}
-                            value={JSON.stringify({
-                              id: airport.id,
-                              name: airport.airport_name,
-                              airport_code: airport.icao_code,
-                              location: airport.country_name
-                            })}
-                            className='cursor-pointer'
-                          >
-                            <div className='flex items-center gap-1'>
-                              <span className='font-medium'>
-                                {airport?.airport_name}
-                              </span>
-                              <span className='text-xs text-gray-600'>
-                                {airport?.country_name},
-                              </span>
-                              <span className='text-xs text-gray-500'>
-                                ({airport?.icao_code})
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))
+                        filteredAirports.map((airport) => {
+                          // Check if this airport should be disabled
+                          const isDisabled = !!(
+                            disabledAirportCode &&
+                            (airport.icao_code === disabledAirportCode ||
+                              airport.id === disabledAirportCode)
+                          );
+
+                          return (
+                            <SelectItem
+                              key={airport.id}
+                              value={JSON.stringify({
+                                id: airport.id,
+                                name: airport.airport_name,
+                                airport_code: airport.icao_code,
+                                location: airport.country_name
+                              })}
+                              className={cn(
+                                "cursor-pointer",
+                                isDisabled && "opacity-50 pointer-events-none"
+                              )}
+                              disabled={isDisabled}
+                            >
+                              <div className='flex items-center gap-1'>
+                                <span className='font-medium'>
+                                  {airport?.airport_name}
+                                </span>
+                                <span className='text-xs text-gray-600'>
+                                  {airport?.country_name},
+                                </span>
+                                <span className='text-xs text-gray-500'>
+                                  ({airport?.icao_code})
+                                </span>
+                                {isDisabled && (
+                                  <span className='text-xs text-red-500 ml-1'>
+                                    (already selected)
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          );
+                        })
                       )}
                     </ScrollArea>
                   </SelectContent>
