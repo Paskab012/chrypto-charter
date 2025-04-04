@@ -91,7 +91,7 @@ const ServicesSection = () => {
             className='relative h-[300px] lg:h-[400px]'
           >
             <Image
-              src='/charter/jet.svg'
+              src='/charter/interior.svg'
               alt='Private Jet'
               layout='fill'
               objectFit='cover'
@@ -108,7 +108,7 @@ const ServicesSection = () => {
             className='relative h-[300px] lg:h-[400px] lg:order-1 order-2'
           >
             <Image
-              src='/charter/yatch.svg'
+              src='/stern.svg'
               alt='Luxury Yacht'
               layout='fill'
               objectFit='cover'
